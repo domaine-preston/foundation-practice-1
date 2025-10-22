@@ -1,0 +1,98 @@
+{% doc %}
+  Renders a section container with flexible layout options, spacing, and styling.
+  Handles responsive behavior, background colors, padding, and content arrangement.
+
+  @param {object} section - Section object containing settings and configuration
+  @param {string} children - HTML content to render inside the section
+  @param {boolean} [wrapper] - Whether to add relative positioning wrapper (default: false)
+  @param {string} [custom_class] - Additional CSS classes to apply
+  @param {object} [custom_attributes] - Additional HTML attributes
+  @param {string} [custom_style] - Inline styles to apply
+
+  Layout settings from section.settings: - content_direction: 'flex-col' or 'flex-row' - vertical_on_mobile: boolean for
+  responsive behavior - reverse_on_mobile: boolean to reverse order on mobile - section_width: 'full-width' or
+  'page-width' - justify_content: flexbox justify-content values - align_items: flexbox align-items values - gap:
+  spacing between elements (0-20) - padding_*: padding for all sides - background_color: color options -
+  background_color_custom: custom color value
+
+  @example
+  {% render 'core-section', section: section, children: content_html, wrapper: true %}
+{% enddoc %}
+
+{%- capture spacing_token -%}
+  {%- render '@spacing-padding', spacing_settings: section.settings -%}
+{%- endcapture -%}
+
+{%- capture gap_token -%}
+  {%- render '@gap-token', value: section.settings.gap -%}
+{%- endcapture -%}
+
+{%- capture color_scheme -%}
+  {%- unless section.settings.inherit_color_scheme -%}
+    {%- render '@color-scheme', color_scheme: section.settings.color_scheme -%}
+  {%- endunless -%}
+{%- endcapture -%}
+
+{% capture container_token %}
+  {% if wrapper %}
+    relative
+  {% endif %}
+  {%- if section.settings.section_width == 'page-width' -%}
+    container
+  {%- endif -%}
+{% endcapture %}
+
+{% capture flex_tokens %} 
+  {%- if section.settings.vertical_on_mobile and section.settings.content_direction == 'flex-row' -%}
+    {% if section.settings.reverse_on_mobile %}flex-col-reverse{% else %}flex-col{% endif %} md:{{ section.settings.content_direction }}
+  {%- else -%}
+    {{ section.settings.content_direction }}
+  {%- endif -%}
+
+  {% if section.settings.use_custom_width %}
+    w-(--core-section-mobile-width-percentage) md:w-(--core-section-width-percentage)
+  {% else %}
+    w-full
+  {% endif %}
+{% endcapture %}
+{%- assign flex_tokens = flex_tokens | prepend: 'flex' -%}
+
+{%- capture flex_direction_tokens -%}
+  {%- if section.settings.content_direction == 'flex-row' -%}
+    {{ section.settings.horizontal_alignment }} {{ section.settings.vertical_alignment }}
+  {%- else -%}
+    {{ section.settings.horizontal_alignment_flex_direction_column }} {{ section.settings.vertical_alignment_flex_direction_column }}
+  {%- endif -%}
+{%- endcapture -%}
+
+{% capture text_alignment_token %}
+  {{ section.settings.text_alignment }}
+{% endcapture %}
+
+{% capture overlay_tokens %}
+  {% if section.settings.overlay_on_mobile %}
+    absolute inset-0 
+    {% if section.settings.overlay_on_desktop == false %}
+      md:relative md:inset-auto
+    {% endif %}
+  {% endif %}
+  {% if section.settings.overlay_on_desktop %}
+    md:absolute md:inset-0 pointer-events-none [&_button]:pointer-events-auto [&_a]:pointer-events-auto
+  {% endif %}
+{% endcapture %}
+
+<div
+  class='{{- flex_tokens | append: ' ' | append: text_alignment_token | append: ' ' | append: color_scheme | append: ' ' | append: flex_direction_tokens | append: ' ' | append: spacing_token | append: ' ' | append: container_token | append: ' ' | append: gap_token | append: ' ' | append: overlay_tokens | strip | strip_newlines -}}'
+  {{ section.shopify_attributes }}
+  style='
+    {% if section.settings.use_custom_width %}
+      --core-section-width-percentage: {{ section.settings.custom_width | append: '%' }};
+      --core-section-mobile-width-percentage: {{ section.settings.custom_width_mobile | append: '%' }};
+    {% endif %}
+    {%- if section.settings.background_color == 'custom' -%}
+      background-color: {{ section.settings.background_color_custom }};;
+    {%- endif -%}
+  '
+>
+  {{ children }}
+</div>

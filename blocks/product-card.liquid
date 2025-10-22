@@ -1,0 +1,65 @@
+{%- doc -%}
+  Displays a product card
+
+  @param {boolean} [lazy_load]
+{%- enddoc -%}
+
+{% liquid
+  assign product = block.settings.product
+  assign media_aspect_ratio = block.settings.media_aspect_ratio | default: 'portrait'
+  assign lazy_load = lazy_load | default: true, allow_false: true
+-%}
+
+{% render 'product-card',
+  product: product,
+  media_aspect_ratio: media_aspect_ratio,
+  lazy_load: lazy_load,
+  shoppable: block.settings.shoppable_card,
+  shopify_attributes: block.shopify_attributes
+%}
+
+{% schema %}
+{
+  "name": "t:names.product_card",
+  "tag": null,
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "t:settings.product"
+    },
+    {
+      "type": "select",
+      "id": "media_aspect_ratio",
+      "label": "t:content.aspect_ratio",
+      "default": "portrait",
+      "options": [
+        {
+          "value": "square",
+          "label": "t:options.aspect_square"
+        },
+        {
+          "value": "portrait",
+          "label": "t:options.aspect_portrait"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "shoppable_card",
+      "label": "t:sections.main-collection-product-grid.settings.shoppable_card.label",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.product_card",
+      "category": "t:preset_categories.product",
+      "settings": {
+        "product": "{{ closest.product }}",
+        "media_aspect_ratio": "portrait"
+      }
+    }
+  ]
+}
+{% endschema %}

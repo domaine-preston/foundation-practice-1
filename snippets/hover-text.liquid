@@ -1,0 +1,29 @@
+{% comment %}
+  {% render 'hover-text',  text: 'Shop Now', class: 'abc-123, maybe a different font size' %}
+{% endcomment %}
+
+{% assign text = text | default: 'Shop Now' %}
+{% assign words = text | split: ' ' %}
+{% assign weight = weight | default: 'font-roboto' %}
+{% assign class = 'text-center uppercase' | append: ' ' | append: class | append: ' ' | append: weight %}
+{% assign letter_class = 'transition-[font-variation-settings] duration-[var(--duration-button)] ease-out hover:font-roboto-exploded shrink-0'
+  | append: ' '
+  | append: letter_class
+%}
+
+<div
+  id='{{ id }}'
+  class='{{ class }}'
+>
+  <div class='flex items-center'>
+    {% for word in words %}
+      {% assign letters = word | split: '' %}
+      {% for letter in letters %}
+        <span class='{{ letter_class }}'>{{ letter }}</span>
+      {% endfor %}
+      {% unless forloop.last %}
+        <span class='{{ letter_class }}'>&nbsp;</span>
+      {% endunless %}
+    {% endfor %}
+  </div>
+</div>

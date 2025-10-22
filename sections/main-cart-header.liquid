@@ -1,0 +1,84 @@
+{% comment %}
+  Cart page header displaying cart status and title.
+  Shows different content based on whether cart is empty or contains items.
+
+  States:
+  - Empty cart: Displays empty message and continue shopping button
+  - Cart with items: Shows cart title and item count
+
+  Features:
+  - Responsive layout with container constraints
+  - Conditional content based on cart state
+  - Continue shopping link when cart is empty
+  - Cart title and item count when cart has items
+  - Consistent styling with site design system
+
+  Dependencies:
+  - Cart liquid object for state detection
+  - Section settings for continue shopping collection
+  - Localization support for all text content
+
+  Schema settings control:
+  - Continue shopping collection URL
+  - Text content customization
+{% endcomment %}
+
+{%- if cart == empty -%}
+  <div class='flex flex-col gap-sm items-center justify-center px-pagemargin py-xl lg:py-2xl 2xl:container'>
+    <div class='flex flex-col gap-2xs items-center justify-center'>
+      <h2 class='text-heading-5'>{{ 'cart.general.empty' | t }}</h2>
+      <p>{{ 'cart.general.empty_subtitle' | t }}</p>
+    </div>
+    <a class='btn' variant='primary' href='{{ section.settings.cart_collection.url }}'>
+      {{- 'cart.general.continue_shopping' | t -}}
+    </a>
+  </div>
+{%- else -%}
+  <div class='flex flex-col gap-xs px-pagemargin 2xl:container'>
+    <div class='border-b border-border-01 lg:border-b-0 py-sm'>
+      <h1 class='h2'>{{ 'sections.cart.title' | t }}</h1>
+
+      {%- render '@needs-script', entries: 'component-cart-total.js' -%}
+      <cart-total class='caption' data-is-cart='true'>&nbsp;</cart-total>
+
+      {%- for block in section.blocks -%}
+        {%- render block -%}
+      {%- endfor -%}
+
+      {%- if shop.customer_accounts_enabled and customer == null -%}
+        <div>
+          <h2 class='h6 inline'>{{ 'sections.cart.login.title' | t }}</h2>
+          <p class='h6 inline'>
+            {{ 'sections.cart.login.paragraph_html' | t: link: routes.account_login_url }}
+          </p>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:sections.main-cart-header.name",
+  "enabled_on": {
+    "templates": ["cart"]
+  },
+  "settings": [
+    {
+      "type": "page",
+      "id": "cart_collection",
+      "label": "t:sections.main-cart-header.settings.cart_collection.label"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.main-cart-header.name"
+    }
+  ]
+}
+{% endschema %}

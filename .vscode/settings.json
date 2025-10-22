@@ -1,0 +1,54 @@
+{
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
+  "files.readonlyInclude": {
+    "src/entry/core/**": true,
+    "blocks/core-*.liquid": true,
+    "sections/core-*.liquid": true,
+    "snippets/@*.liquid": true
+  },
+  "files.readonlyFromPermissions": true,
+  "explorer.decorations.colors": true,
+  "explorer.decorations.badges": true,
+  "css.customData": [".vscode/tailwind.json"],
+  "tailwindCSS.classAttributes": [
+    "class",
+    "className",
+    ".*Styles",
+    ".*Classes"
+  ],
+  "tailwindCSS.classFunctions": [
+    "tw",
+    "clsx",
+    "tw\\.[a-z-]+"
+  ],
+  "tailwindCSS.includeLanguages": {
+    "plaintext": "html",
+    "liquid": "html"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    [
+      "class:\\s*['\"]([^'\"]*)['\"]"
+    ],
+    [
+      "class\\s*[:=]\\s*['\"]([^'\"]*)['\"]"
+    ],
+    [
+      "['\"]class['\"]\\s*[:=]\\s*['\"]([^'\"]*)['\"]"
+    ]
+  ],
+  "mcp": {
+    "servers": {
+      "shopify-dev-mcp": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@shopify/dev-mcp@latest"
+        ],
+        "env": {
+          "LIQUID": true
+        }
+      }
+    }
+  }
+}

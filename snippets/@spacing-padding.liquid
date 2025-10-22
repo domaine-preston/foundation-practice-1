@@ -1,0 +1,62 @@
+{% doc %}
+  Returns TW spacing token value based on the provided numeric `value` parameter.
+
+  @param {object} spacing_settings - {block.settings || section.settings}
+  @param {string} [default_token] - Default value to use if `settings` is not provided margin.
+
+  @example
+  {% render 'spacing-token', value: 4, variant: 'pt' %}
+{% enddoc %}
+
+{% comment %}
+  capture pr render '@spacing-token', value: block.settings.padding_inline_end, variant: 'pr' endcapture assign spacing_token =
+  spacing_token | append: ' ' | append: pr
+
+  capture pb render '@spacing-token', value: block.settings.padding_bottom, variant: 'pb' endcapture assign spacing_token
+  = spacing_token | append: ' ' | append: pb
+
+  capture pl render '@spacing-token', value: block.settings.padding_inline_start, variant: 'pl' endcapture
+{% endcomment %}
+{%- liquid
+  assign tokens = null
+  assign has_custom_spacing = true
+  if spacing_settings.use_custom_spacing == false
+    assign has_custom_spacing = false
+  endif
+
+  if has_custom_spacing
+    if spacing_settings.padding_top != blank
+      capture pt
+        render '@spacing-token', value: spacing_settings.padding_top, variant: 'pt'
+      endcapture
+      assign tokens = tokens | append: ' ' | append: pt
+    endif
+
+    if spacing_settings.padding_bottom != blank
+      capture pb
+        render '@spacing-token', value: spacing_settings.padding_bottom, variant: 'pb'
+      endcapture
+      assign tokens = tokens | append: ' ' | append: pb
+    endif
+
+    if spacing_settings.padding_inline_start != blank
+      capture pl
+        render '@spacing-token', value: spacing_settings.padding_inline_start, variant: 'ps'
+      endcapture
+      assign tokens = tokens | append: ' ' | append: pl
+    endif
+
+    if spacing_settings.padding_inline_end != blank
+      capture pr
+        render '@spacing-token', value: spacing_settings.padding_inline_end, variant: 'pe'
+      endcapture
+      assign tokens = tokens | append: ' ' | append: pr
+    endif
+  endif
+
+  if tokens == null
+    assign tokens = default_token
+  endif
+
+  echo tokens
+-%}

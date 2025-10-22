@@ -1,0 +1,13 @@
+{%- doc -%}
+  @param {object} results - The pagination results object.
+{%- enddoc -%}
+
+{%- if results.pages > 1 -%}
+  {%- render 'pagination', paginate: results -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:names.pagination"
+}
+{% endschema %}

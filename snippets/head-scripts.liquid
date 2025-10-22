@@ -1,0 +1,64 @@
+{%- liquid
+  render '@needs-script', entries: 'core-global'
+  render '@needs-script', entries: 'core-app-provider'
+  render '@needs-script', entries: 'main-header.js'
+
+  capture core_icon_script
+    render '@needs-script', entries: 'core-icon'
+  endcapture
+
+  echo core_icon_script
+
+  # Get @vite-plugin-svg-spritemap/client__spritemap URL during dev mode
+  assign client_spritemap = ''
+  assign split = core_icon_script | split: 'src="'
+  assign url = split[1] | split: '"' | first
+  if url contains '@vite/client'
+    assign client_spritemap = url | replace: '@vite/client', '@vite-plugin-svg-spritemap/client__spritemap'
+  endif
+-%}
+
+{%- if client_spritemap != blank -%}
+  <script type='module' src='{{ client_spritemap }}'></script>
+  <script>
+    window.__VITE_DEV_MODE__ = true
+  </script>
+{%- else -%}
+  {{ 'icons.svg' | asset_url | preload_tag: as: 'image', type: 'image/svg+xml', crossorigin: 'anonymous' }}
+{%- endif -%}
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace('no-js', 'js')
+</script>
+
+<script>
+  window.routes = {
+    cart_add_url: '{{ routes.cart_add_url }}',
+    cart_change_url: '{{ routes.cart_change_url }}',
+    cart_update_url: '{{ routes.cart_update_url }}',
+    predictive_search_url: '{{ routes.predictive_search_url }}',
+  }
+
+  window.cartStrings = {
+    error: `{{ 'sections.cart.cart_error' | t }}`,
+    quantityError: `{{ 'sections.cart.cart_quantity_error_html' | t }}`,
+    itemCountOne: `{{ 'cart.popup.cart_count.one' | t }}`,
+    itemCountOther: `{{ 'cart.popup.cart_count.other' | t }}`,
+  }
+
+  window.variantStrings = {
+    addToCart: `{{ 'products.product.add_to_cart' | t }}`,
+    soldOut: `{{ 'products.product.sold_out' | t }}`,
+    unavailable: `{{ 'products.product.unavailable' | t }}`,
+  }
+</script>
+
+<script>
+  window.__STOREFRONT_ACCESS_TOKEN__ = '{{ settings.storefront_access_token }}'
+  window.__CART__ = {{ cart | json }}
+  window.__VENDORS__ = {
+    nosto: {
+      enabled: {{ settings.nosto_enable | json }} ?? false
+    },
+  }
+</script>

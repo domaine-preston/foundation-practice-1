@@ -1,0 +1,78 @@
+{%- doc -%}
+  Renders a header menu block.
+
+  @param {string} [variant] - What version of the menu to render.
+{%- enddoc -%}
+
+{%- liquid
+  capture content_for_blocks
+    content_for 'blocks'
+  endcapture
+
+  assign block_variants = content_for_blocks | remove_first: '<!-- @variant/split -->' | split: '<!-- @variant/split -->'
+  assign blocks_desktop = ''
+  assign blocks_mobile = ''
+  for variant in block_variants
+    assign remainder = forloop.index0 | modulo: 2
+    assign is_mobile = true
+    if remainder == 0
+      assign is_mobile = false
+    endif
+    if is_mobile
+      assign blocks_mobile = blocks_mobile | append: variant
+    else
+      assign blocks_desktop = blocks_desktop | append: variant
+    endif
+  endfor
+
+  capture color_scheme_class
+    echo block.settings.color_scheme | prepend: 'color-'
+  endcapture
+-%}
+
+{%- if variant == 'mobile' -%}
+  {%- capture menu_toggle_button -%}
+    <button
+      aria-haspopup='dialog'
+      aria-controls='mobile-menu-drawer'
+      class="group/menutoggle inline-flex lg:hidden"
+      {{ block.shopify_attributes }}
+    >
+      {%- render 'icon' with 'icon-hamburger', class: 'size-6 group-[[open]]/menutoggle:hidden text-[28px] md:text-[32px]' -%}
+      {%- render 'icon' with 'icon-close', class: 'group-[[open]]/menutoggle:inline-flex hidden text-[28px] md:text-[32px]' -%}
+      <span class="sr-only">{{ 'sections.header.menu' | t }}</span>
+    </button>
+  {%- endcapture -%}
+
+  {%- render 'modal-dialog-toggle',
+    modal_id: 'mobile-menu-drawer',
+    label: 'Toggle Modal',
+    toggle_element: menu_toggle_button
+  -%}
+
+  {%- render 'header-drawer', children: blocks_mobile, color_scheme_class: color_scheme_class -%}
+{%- else -%}
+  {%- render 'mega-menu', shopify_attributes: block.shopify_attributes, children: blocks_desktop, color_scheme_class: color_scheme_class -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:blocks.header_menu.name",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "_header-mega-menu"
+    },
+    {
+      "type": "_header-direct-link"
+    }
+  ]
+}
+{% endschema %}

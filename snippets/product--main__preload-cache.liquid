@@ -1,0 +1,32 @@
+{% doc %}
+Prefetches and caches the main product sections for each product option/variant, so that variant change/interaction is
+faster.
+
+@param {string} [section_id] - The section.id of the section that calls this snippet
+
+@example
+{% render 'product--main__preload-cache', section_id: section.id %}
+{% enddoc %}
+
+{%- capture hydration_cache -%}
+{%- for option in product.options_with_values -%}
+  {%- for value in option.values -%}
+    {%- assign base_url = value.product_url -%}
+    {%- if base_url == blank -%}
+      {%- assign base_url = product.url -%}
+    {%- endif -%}
+
+    <hydrate-sections-cache
+      base-url='{{ base_url }}?variant={{ value.variant.id }}'
+      sections='{{ section_id }}'
+    >
+    </hydrate-sections-cache>
+  {%- endfor -%}
+{%- endfor -%}
+{%- endcapture -%}
+
+{%- if hydration_cache != blank -%}
+  <span sub-section-id='{{ section_id }}-product-pre-cache-links' class='hidden'>
+    {{ hydration_cache }}
+  </span>
+{%- endif -%}

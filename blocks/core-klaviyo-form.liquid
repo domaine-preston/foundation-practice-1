@@ -1,0 +1,251 @@
+{%- liquid
+  assign mod_settings = block.settings
+  assign label = mod_settings.label | default: 'Email'
+  assign button_label = mod_settings.button_label | default: 'Subscribe'
+  assign validation_error_message = mod_settings.validation_error_message | default: 'Please enter a valid email address.'
+  assign api_error_message = mod_settings.api_error_message | default: 'There was an error processing your request. Please try again later.'
+  assign success_message = mod_settings.success_message | default: 'Thank you for subscribing!'
+  assign list_id = mod_settings.list_id
+  assign button_style = mod_settings.style | default: 'primary'
+
+  if mod_settings.color_mode == 'inverse'
+    assign button_style = mod_settings.style_inverse | default: 'primary-inverse'
+  endif
+-%}
+{%- if list_id != blank -%}
+  {%- assign locale_root_url = request.locale.root_url | remove: '/' | split: '-' -%}
+  {%- assign locale = locale_root_url[0] | default: 'en' -%}
+  {%- assign market = locale_root_url[1] | default: 'CA' -%}
+  {%- assign country = localization.country | default: 'Canada' -%}
+
+  {%- render '@needs-script', entries: 'klaviyo-signup-form' -%}
+  <style>
+    #{{ block.id }} {
+      --klaviyo-signup-form-width: {{ mod_settings.mobile_width | default: 100 }}%;
+    }
+
+    @media (min-width: 768px) {
+      #{{ block.id }} {
+        --klaviyo-signup-form-width: {{ mod_settings.width | default: 50 }}%;
+      }
+    }
+  </style>
+  <klaviyo-signup-form
+    list-id='{{ list_id }}'
+    class='group/email-signup w-(--klaviyo-signup-form-width)'
+    locale='{{ locale }}'
+    market='{{ market }}'
+    country='{{ country }}'
+    id='{{ block.id }}'
+    {{ block.shopify_attributes }}
+  >
+    {% capture form_wrapper_classes %}
+      {% if mod_settings.desktop_layout == 'horizontal' %}
+        md:flex md:items-center md:gap-sm md:flex-nowrap
+      {% else %}
+        md:grid md:grid-cols-1 md:gap-xs
+      {% endif %}
+      {% if mod_settings.mobile_layout == 'horizontal' %}
+        flex items-center gap-sm flex-nowrap
+      {% else %}
+        grid grid-cols-1 gap-xs
+      {% endif %}
+    {% endcapture %}
+    <form class='grid grid-cols-1 gap-xs'>
+      <div class='{{ form_wrapper_classes | strip | strip_newlines }}'>
+        {%- assign field_id = block.id | append: '-email' -%}
+        {%- render 'form-field',
+          kind: 'input',
+          type: 'email',
+          name: 'email',
+          id: field_id,
+          required: true,
+          label: label,
+          autocomplete: 'off',
+          wrapper_class: 'grow w-full'
+        -%}
+
+        <button
+          type='submit'
+          class='btn js-signup-form-submit !w-auto'
+          variant='{{ button_style }}'
+        >
+          {{ button_label }}
+        </button>
+      </div>
+
+      <div class='js-signup-validation-error text-body text-t-accent-02 hidden group-data-[state="error-validation"]/email-signup:block'>
+        <span>{{ validation_error_message }}</span>
+      </div>
+      <div class='js-signup-api-error text-body text-t-accent-02 hidden group-data-[state="error-api"]/email-signup:block'>
+        <span>{{ api_error_message }}</span>
+      </div>
+      <div class='js-signup-success text-body hidden group-data-[state="success"]/email-signup:block'>
+        {{ success_message }}
+      </div>
+    </form>
+  </klaviyo-signup-form>
+{%- else -%}
+  <span {{ block.shopify_attributes }}>Please provide a List ID</span>
+{%- endif -%}
+{% schema %}
+{
+  "name": "t:names.core-klaviyo-form",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "t:content.label",
+      "default": "Email"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "t:content.button_label",
+      "default": "Subscribe"
+    },
+    {
+      "type": "text",
+      "id": "validation_error_message",
+      "label": "t:content.validation_error_message",
+      "default": "Please enter a valid email address."
+    },
+    {
+      "type": "text",
+      "id": "api_error_message",
+      "label": "t:content.api_error_message",
+      "default": "There was an error processing your request. Please try again later."
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "t:content.success_message",
+      "default": "Thank you for subscribing!"
+    },
+    {
+      "type": "text",
+      "id": "list_id",
+      "label": "List ID"
+    },
+    {
+      "type": "select",
+      "id": "color_mode",
+      "label": "t:content.color_mode",
+      "options": [
+        { "value": "standard", "label": "t:content.color_mode_standard" },
+        { "value": "inverse", "label": "t:content.color_mode_inverse" }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "select",
+      "id": "style",
+      "label": "t:content.button_style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "t:options.primary"
+        },
+        {
+          "value": "secondary",
+          "label": "t:options.secondary"
+        },
+        {
+          "value": "tertiary",
+          "label": "t:options.tertiary"
+        }
+      ],
+      "default": "primary",
+      "visible_if": "{{ block.settings.color_mode == 'standard' }}"
+    },
+    {
+      "type": "select",
+      "id": "style_inverse",
+      "label": "t:content.button_style",
+      "options": [
+        {
+          "value": "primary-inverse",
+          "label": "t:options.primary"
+        },
+        {
+          "value": "secondary-inverse",
+          "label": "t:options.secondary"
+        },
+        {
+          "value": "tertiary-inverse",
+          "label": "t:options.tertiary"
+        }
+      ],
+      "default": "primary-inverse",
+      "visible_if": "{{ block.settings.color_mode == 'inverse' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.layout"
+    },
+    {
+      "type": "select",
+      "id": "desktop_layout",
+      "label": "t:content.desktop_layout",
+      "options": [
+        {
+          "value": "horizontal",
+          "label": "t:settings.horizontal"
+        },
+        {
+          "value": "vertical",
+          "label": "t:settings.vertical"
+        }
+      ],
+      "default": "horizontal"
+    },
+    {
+      "type": "select",
+      "id": "mobile_layout",
+      "label": "t:content.mobile_layout",
+      "options": [
+        {
+          "value": "horizontal",
+          "label": "t:settings.horizontal"
+        },
+        {
+          "value": "vertical",
+          "label": "t:settings.vertical"
+        }
+      ],
+      "default": "vertical"
+    },
+    {
+      "type": "header",
+      "content": "t:content.size"
+    },
+    {
+      "type": "range",
+      "id": "width",
+      "min": 40,
+      "max": 100,
+      "step": 1,
+      "default": 50,
+      "unit": "%",
+      "label": "t:settings.width"
+    },
+    {
+      "type": "range",
+      "id": "mobile_width",
+      "min": 40,
+      "max": 100,
+      "step": 1,
+      "default": 100,
+      "unit": "%",
+      "label": "t:settings.mobile_width"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.core-klaviyo-form",
+      "category": "t:preset_categories.core-basic"
+    }
+  ]
+}
+{% endschema %}

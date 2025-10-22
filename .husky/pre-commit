@@ -1,0 +1,41 @@
+# Check for modifications to protected core files first
+echo "🔍 Checking for modifications to protected core files..."
+
+# Define protected file patterns
+protected_patterns=("src/entry/core/" "blocks/core-" "sections/core-" "snippets/@")
+
+# Check each pattern
+has_protected_files=false
+for pattern in "${protected_patterns[@]}"; do
+    if git diff --cached --name-only | grep -q "$pattern"; then
+        has_protected_files=true
+        echo "❌ ERROR: Attempting to modify protected core files matching pattern: $pattern"
+        echo ""
+        echo "📁 Protected files found in commit:"
+        git diff --cached --name-only | grep "$pattern" | sed 's/^/   • /'
+        echo ""
+    fi
+done
+
+if [ "$has_protected_files" = true ]; then
+    echo "🚫 COMMIT BLOCKED: Core files are read-only and should not be modified directly."
+    echo ""
+    echo "📖 Instead, you should:"
+    echo "   • For JS/TS core files: Create a new component that extends the core component"
+    echo "   • For Liquid core files: Copy the file with a new name and modify the copy"
+    echo ""
+    echo "🔧 To bypass this check (not recommended), run:"
+    echo "   git commit --no-verify"
+    echo ""
+    exit 1
+fi
+
+echo "✅ No protected core files detected in commit. Proceeding with validation..."
+
+# Run existing validation scripts
+npx lint-staged
+npm run validate:design-manifest
+npm run json:lint
+npm run lint:theme
+npm run build
+npm run typecheck

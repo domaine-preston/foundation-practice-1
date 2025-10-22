@@ -1,0 +1,32 @@
+{% doc %}
+  Renders a list of nested product options.
+
+  @param {string} product_form_id - The ID of the product form
+  @param {object} product - The product object
+  @param {object} products - The list of products to render
+{% enddoc %}
+{%- assign parent_id = product.selected_or_first_available_variant.id -%}
+{%- if products != blank -%}
+  {%- for product in products -%}
+    {%- assign variant = product.selected_or_first_available_variant -%}
+    {%- assign name = 'items[' | append: forloop.index | append: '][id]' -%}
+    <input type='hidden' form='{{ product_form_id }}' name='items[{{ forloop.index }}][quantity]' value='1'>
+    <input
+      type='hidden'
+      form='{{ product_form_id }}'
+      name='items[{{ forloop.index }}][parent_id]'
+      value='{{ parent_id }}'
+    >
+    {%- if variant.available -%}
+      {%- render 'form-field',
+        kind: 'checkbox',
+        checked: false,
+        name: name,
+        form_id: product_form_id,
+        label: product.title,
+        value: variant.id,
+        help_text: 'Some help text'
+      -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}

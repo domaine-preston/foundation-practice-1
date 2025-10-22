@@ -1,0 +1,122 @@
+{%- liquid
+  assign mod_settings = block.settings
+
+  capture content_for_blocks
+    content_for 'blocks'
+  endcapture
+
+  assign block_variants = content_for_blocks | remove_first: '<!-- @@variant/split -->' | split: '<!-- @@variant/split -->'
+  assign blocks_desktop = ''
+  assign blocks_mobile = ''
+  for variant in block_variants
+    assign remainder = forloop.index0 | modulo: 2
+    assign is_mobile = true
+    if remainder == 0
+      assign is_mobile = false
+    endif
+    if is_mobile
+      assign blocks_mobile = blocks_mobile | append: variant
+    else
+      assign blocks_desktop = blocks_desktop | append: variant
+    endif
+  endfor
+-%}
+
+<!-- @variant/split -->
+{%- comment -%}
+  Desktop variant
+{%- endcomment -%}
+<li id='Details-HeaderMenu-{{ block.id }}' {{ block.shopify_attributes }}>
+  <a
+    id='HeaderMenu-{{ block.id }}'
+    class='p peer'
+    href='{{ mod_settings.url }}'
+    aria-haspopup='menu'
+    aria-expanded='false'
+    aria-controls='MegaMenu-Content-{{ block.id }}'
+    menu-trigger
+  >
+    <span class='utility'>
+      {{- mod_settings.label | escape -}}
+    </span>
+    {% render 'icon' with 'icon-caret', size: 10 %}
+  </a>
+
+  <div
+    id='MegaMenu-Content-{{ block.id }}'
+    class='absolute bg-background text-foreground top-full left-0 right-0 invisible opacity-0 transition-[opacity,visibility] duration-200 peer-[[aria-expanded="true"]]:visible peer-[[aria-expanded="true"]]:opacity-100 group-focus-within:visible group-focus-within:opacity-100'
+    aria-hidden='true'
+    role='region'
+    menu
+    aria-labelledby='HeaderMenu-{{ block.id }}'
+  >
+    <ul
+      class='px-pagemargin 2xl:container py-lg grid grid-cols-4 gap-sm'
+      role='list'
+    >
+      {{ blocks_desktop }}
+    </ul>
+  </div>
+</li>
+
+<!-- @variant/split -->
+{%- comment -%}
+  Mobile variant
+{%- endcomment -%}
+{%- assign modal_id = 'Details-menu-drawer-menu-item-' | append: block.id -%}
+{%- capture toggle_button -%}
+  <button class="h5 inline-flex items-center justify-between w-full">
+    <span>{{- mod_settings.label -}}</span>
+    {% render 'icon' with 'icon-arrow', size: 16 %}
+  </button>
+{%- endcapture -%}
+
+{%- capture modal_content -%}
+  <div class="flex flex-col justify-between h-[calc(100vh_-_60px)]">
+    <ul class='list-none p-0 px-sm grid grid-cols-1 gap-y-sm' tabindex='-1'>
+      {{ blocks_mobile }}
+    </ul>
+  </div>
+{%- endcapture -%}
+
+<li>
+  {%- render 'modal-dialog-toggle', modal_id: modal_id, toggle_element: toggle_button, class: 'w-full' -%}
+
+  {%- render 'modal-dialog',
+    id: modal_id,
+    content: modal_content,
+    type: 'drawer',
+    close_on_backdrop_click: true,
+    title: mod_settings.label
+  -%}
+</li>
+
+{% schema %}
+{
+  "name": "t:blocks.header-megamenu.name",
+  "tag": null,
+  "presets": [
+    {
+      "name": "t:blocks.header-megamenu.name"
+    }
+  ],
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "t:blocks.header-megamenu.settings.label"
+    },
+    {
+      "type": "url",
+      "id": "url",
+      "label": "t:blocks.header-megamenu.settings.main_url"
+    }
+  ],
+  "blocks": [
+    { "type": "_header-link-list" },
+    { "type": "_header-image_content" },
+    { "type": "liquid" },
+    { "type": "_menu-direct-link" }
+  ]
+}
+{% endschema %}

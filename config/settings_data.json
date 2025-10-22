@@ -1,0 +1,168 @@
+{
+  "current": {
+    "color_schemes": {
+      "scheme-1": {
+        "settings": {
+          "background": "#FFFFFF",
+          "secondary_background": "#FEF6EB",
+          "text": "#2B2727",
+          "secondary_text": "#717171",
+          "button": "#2B2727",
+          "button_label": "#F6EDE0",
+          "button_hover": "#AB4824",
+          "button_hover_label": "#F6EDE0",
+          "secondary_button_label": "#2B2727",
+          "tertiary_button_label": "#2B2727",
+          "tertiary_button_hover_label": "#2B2727",
+          "accent": "#AB4824",
+          "secondary_accent": "#717171",
+          "border": "#B3B2B1",
+          "secondary_border": "#717171",
+          "disabled": "#B3B2B1",
+          "link": "#AB4824"
+        }
+      },
+      "scheme-2": {
+        "settings": {
+          "background": "#F6EDE0",
+          "secondary_background": "#FEF6EB",
+          "text": "#2B2727",
+          "secondary_text": "#717171",
+          "button": "#2B2727",
+          "button_label": "#F6EDE0",
+          "button_hover": "#AB4824",
+          "button_hover_label": "#F6EDE0",
+          "secondary_button_label": "#2B2727",
+          "tertiary_button_label": "#2B2727",
+          "tertiary_button_hover_label": "#2B2727",
+          "accent": "#AB4824",
+          "secondary_accent": "#2B2727",
+          "border": "#B3B2B1",
+          "secondary_border": "#717171",
+          "disabled": "#B3B2B1",
+          "link": "#2B2727"
+        }
+      },
+      "scheme-3": {
+        "settings": {
+          "background": "#2B2727",
+          "secondary_background": "#717171",
+          "text": "#FFFFFF",
+          "secondary_text": "#B3B2B1",
+          "button": "#FFFFFF",
+          "button_label": "#2B2727",
+          "button_hover": "#AB4824",
+          "button_hover_label": "#F6EDE0",
+          "secondary_button_label": "#FFFFFF",
+          "tertiary_button_label": "#FFFFFF",
+          "tertiary_button_hover_label": "#FFFFFF",
+          "accent": "#AB4824",
+          "secondary_accent": "#F6EDE0",
+          "border": "#717171",
+          "secondary_border": "#B3B2B1",
+          "disabled": "#717171",
+          "link": "#F6EDE0"
+        }
+      },
+      "scheme-4": {
+        "settings": {
+          "background": "#AB4824",
+          "secondary_background": "#2B2727",
+          "text": "#FFFFFF",
+          "secondary_text": "#F6EDE0",
+          "button": "#2B2727",
+          "button_label": "#F6EDE0",
+          "button_hover": "#F6EDE0",
+          "button_hover_label": "#2B2727",
+          "secondary_button_label": "#2B2727",
+          "tertiary_button_label": "#FFFFFF",
+          "tertiary_button_hover_label": "#FFFFFF",
+          "accent": "#F6EDE0",
+          "secondary_accent": "#FFFFFF",
+          "border": "#F6EDE0",
+          "secondary_border": "#717171",
+          "disabled": "#717171",
+          "link": "#F6EDE0"
+        }
+      },
+      "scheme-5": {
+        "settings": {
+          "background": "transparent",
+          "secondary_background": "transparent",
+          "text": "#FFFFFF",
+          "secondary_text": "#E8E6E5",
+          "button": "#FFFFFF",
+          "button_label": "#2B2727",
+          "button_hover": "#AB4824",
+          "button_hover_label": "#F6EDE0",
+          "secondary_button_label": "#FFFFFF",
+          "tertiary_button_label": "#FFFFFF",
+          "tertiary_button_hover_label": "#FFFFFF",
+          "accent": "#AB4824",
+          "secondary_accent": "#F6EDE0",
+          "border": "#E8E6E5",
+          "secondary_border": "#D1CFCE",
+          "disabled": "#9A9795",
+          "link": "#F6EDE0"
+        }
+      }
+    },
+    "colors_accent_1": "#000000",
+    "sections": {
+      "announcement-bar": {
+        "type": "announcement-bar",
+        "blocks": {
+          "announcement-bar-0": {
+            "type": "announcement",
+            "settings": {
+              "text": "Welcome to our store",
+              "link": ""
+            }
+          }
+        },
+        "block_order": ["announcement-bar-0"],
+        "settings": {}
+      },
+      "header": {
+        "type": "header",
+        "settings": {
+          "logo": "shopify://shop_images/HalfHelix_SmallIcon_Black.png",
+          "menu": "main-menu",
+          "enable_sticky_header": true
+        }
+      },
+      "footer": {
+        "type": "footer",
+        "blocks": {
+          "footer-0": {
+            "type": "link_list",
+            "settings": {
+              "heading": "Customer Service",
+              "menu": "footer"
+            }
+          },
+          "0ec48db8-bd5a-4f43-a0dd-6dfd93b48065": {
+            "type": "link_list",
+            "settings": {
+              "heading": "About",
+              "menu": "footer"
+            }
+          }
+        },
+        "block_order": ["footer-0", "0ec48db8-bd5a-4f43-a0dd-6dfd93b48065"],
+        "settings": {
+          "newsletter_heading": "Sign up to our emails",
+          "newsletter_caption": "Get glowing with our latest products and exclusive events.",
+          "show_social": false,
+          "enable_country_selector": true,
+          "enable_language_selector": true
+        }
+      },
+      "mini-cart": {
+        "type": "mini-cart",
+        "settings": {}
+      }
+    },
+    "content_for_index": []
+  }
+}

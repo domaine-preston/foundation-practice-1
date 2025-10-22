@@ -1,0 +1,127 @@
+{% comment %}
+  Main cart page body displaying cart items and order summary.
+  Provides full cart management functionality with responsive layout.
+
+  Features:
+  - Cart line items with quantity controls
+  - Item removal and updating
+  - Order summary with totals and taxes
+  - Discount code application
+  - Cart notes
+  - Responsive two-column layout (items | summary)
+  - Real-time cart updates
+
+  Layout:
+  - Left column (65%): Cart items and controls
+  - Right column (35%): Order summary and checkout
+  - Mobile: Stacked single column
+
+  Dependencies:
+  - core-cart-sections web component for real-time updates
+  - main-cart-item snippet for individual items
+  - Cart form functionality for updates
+  - Various cart-related snippets
+
+  Schema settings control:
+  - Empty cart messaging
+  - Continue shopping links
+  - Shipping information display
+{% endcomment %}
+
+{%- if cart != empty -%}
+  {%- render '@needs-script', entries: 'core-cart-sections' -%}
+  <cart-sections
+    section-id='{{ section.id }}'
+    id='{{ section.id }}'
+    register-for-cart-updates
+    class='grid lg:grid-cols-[65%_1fr] lg:border-t lg:border-border-01 gap-y-sm'
+  >
+    {% comment %} line items {% endcomment %}
+    <div class='px-pagemargin 2xl:container pb-md lg:py-md grid grid-cols-1 gap-y-sm lg:border-r lg:border-border-01 lg:h-full'>
+      <form action='{{ routes.cart_url }}' class='cart__contents critical-hidden' method='post' id='cart'>
+        <div class='grid grid-cols-[100px_1fr] sm:grid-cols-[100px_1fr_auto]' id='main-cart-items'>
+          {%- liquid
+            render 'main-cart-item' for cart.items as item
+          -%}
+        </div>
+      </form>
+    </div>
+    {% comment %} Totals {% endcomment %}
+    <div class='flex px-pagemargin 2xl:container py-md'>
+      <div class='w-full grid grid-cols-1 gap-sm'>
+        {%- render 'cart-note-input' -%}
+        {% for block in section.blocks %}
+          {%- case block.type -%}
+            {%- when '@app' -%}
+              {% render block %}
+            {%- when 'discount_code' -%}
+              {%- render 'cart-discount-code' -%}
+            {%- when 'subtotal' -%}
+              <div class='grid grid-cols-1 gap-2xs' {{ block.shopify_attributes }}>
+                {%- render 'cart-totals-content' -%}
+              </div>
+            {%- else -%}
+              <div class='grid grid-cols-1 gap-2xs' {{ block.shopify_attributes }}>
+                <button
+                  type='submit'
+                  id='checkout'
+                  class='btn'
+                  variant='primary'
+                  name='checkout'
+                  {% if cart == empty %}
+                    disabled
+                  {% endif %}
+                  form='cart'
+                >
+                  {{ 'sections.cart.checkout' | t }}
+                </button>
+              </div>
+
+              {%- if additional_checkout_buttons -%}
+                <div class='grid grid-cols-1 gap-xs'>
+                  {{ content_for_additional_checkout_buttons }}
+                </div>
+              {%- endif -%}
+          {%- endcase -%}
+        {% endfor %}
+
+        <div id='cart-errors'></div>
+      </div>
+    </div>
+  </cart-sections>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:sections.main-cart-body.name",
+  "enabled_on": {
+    "templates": ["cart"]
+  },
+  "settings": [],
+  "blocks": [
+    {
+      "type": "subtotal",
+      "name": "t:sections.main-cart-body.blocks.subtotal.name",
+      "limit": 1
+    },
+    {
+      "type": "buttons",
+      "name": "t:sections.main-cart-body.blocks.buttons.name",
+      "limit": 1
+    },
+    {
+      "type": "@app"
+    },
+    {
+      "type": "discount_code",
+      "name": "t:sections.main-cart-body.blocks.discount_code.name",
+      "limit": 1
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.main-cart-body.name"
+    }
+  ]
+}
+{% endschema %}

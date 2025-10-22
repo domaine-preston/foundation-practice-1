@@ -1,0 +1,32 @@
+{% doc %}
+  Renders a SVG icon. Make sure the requested icon is present in the src/icons directory.
+
+  @param {string} icon - Name of the icon file (required)
+  @param {string} [class] - Class name for the icon (required)
+  @param {string} [label] - Aria label for the icon
+  @param {string} [attributes] - Additional attributes for the icon
+  @param {number} [size] - Size of the icon in pixels
+
+  @example
+  {% render 'icon', icon: 'icon-account', class: 'text-link', label: 'Account', size: 24 %}
+{% enddoc %}
+{%- liquid
+  assign class = class
+  assign icon = icon
+  assign label = label
+  assign attributes = attributes | default: ''
+  assign size = size
+-%}
+<svg-icon
+  src='{{ icon }}'
+  class='{{ class }}'
+
+  {% if size != blank %}
+    style='--icon-size: {{ size }}px;'
+  {% endif %}
+
+  {% if label != blank %}
+    aria-label='{{ label }}'
+  {% endif %}
+  {{ attributes }}
+></svg-icon>

@@ -1,0 +1,172 @@
+name: Bug report
+description: Create a report to help us improve our Foundation tooling.
+labels:
+  - 'bug'
+  - 'needs-triage'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        :warning: **PLEASE FIRST READ THE [DOCUMENTATION](../docs/README.md) AND [COMMON QUESTIONS](../docs/common-questions.md)** before submitting a bug report!
+
+        Thank you for taking the time to report a bug in Domaine's Foundation tooling. Please fill out this form as completely as possible to help us resolve the issue quickly.
+
+  - type: textarea
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is. Include what you were trying to do and what happened instead.
+      placeholder: |
+        Example: The product variant picker is not updating the price when selecting different options on mobile devices.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: Please provide detailed steps to reproduce the behavior.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Select '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Screenshots / Videos / Live demo link
+      description: If applicable, add screenshots, videos, or a link to a live demo to help explain your problem.
+      placeholder: |
+        You can drag and drop images here or paste them directly.
+        For live demos, please provide a link to the store where the issue can be reproduced.
+
+  - type: dropdown
+    attributes:
+      label: Environment
+      description: Where is this bug occurring?
+      options:
+        - Development (local)
+        - Preview theme
+        - Live/Production theme
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Shopify store URL
+      description: The store where the issue is occurring (if applicable)
+      placeholder: 'https://your-store.myshopify.com or https://your-custom-domain.com'
+
+  - type: dropdown
+    attributes:
+      label: Browser(s) affected
+      description: Which browser(s) are experiencing this issue?
+      multiple: true
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - Mobile Safari (iOS)
+        - Chrome Mobile (Android)
+        - Other (please specify in additional context)
+
+  - type: dropdown
+    attributes:
+      label: Device type
+      description: What type of device is experiencing this issue?
+      multiple: true
+      options:
+        - Desktop
+        - Mobile phone
+        - Tablet
+        - Not device-specific
+
+  - type: checkboxes
+    attributes:
+      label: Related areas
+      description: Which parts of the theme might be related to this issue? (Check all that apply)
+      options:
+        - label: Product pages/forms
+        - label: Collection pages/filtering
+        - label: Cart/checkout flow
+        - label: Header/navigation
+        - label: Footer
+        - label: Search functionality
+        - label: Dynamic product cards
+        - label: Core components (accordion, carousel, etc.)
+        - label: CSS/styling issues
+        - label: JavaScript/TypeScript functionality
+        - label: Performance issues
+        - label: Accessibility issues
+        - label: Third-party app integration
+
+  - type: textarea
+    attributes:
+      label: Development environment (if applicable)
+      description: If this is a development-related issue, please provide version information
+      placeholder: |
+        - Node.js version: 
+        - npm version: 
+        - Shopify CLI version: 
+        - Theme version/commit: 
+        - Any custom modifications made:
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here, including error messages, console logs, or network requests.
+      placeholder: |
+        Please include:
+        - Browser console errors (if any)
+        - Network errors in browser dev tools
+        - Any custom code modifications
+        - Third-party apps that might be interfering
+        - When the issue started occurring
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### 📋 FAQ (Quick Reference)
+
+        Below are some common issues and solutions. For the complete FAQ, see [common-questions.md](../docs/common-questions.md).
+
+        #### Q: Dynamic product cards aren't rendering
+        **Ans:** Check if you're using the correct product handle/variant ID and ensure the template exists. Dynamic product cards are for third-party integrations like Nosto, Algolia, or wishlist apps.
+
+        #### Q: My JavaScript isn't loading on certain pages
+        **Ans:** Check if you're using `@needs-script` correctly. This only works for section-specific scripts. For global scripts or third-party integrations, use head/body scripts instead.
+
+        #### Q: Core components are broken after my changes
+        **Ans:** Core files (prefixed with `core-` or `@`) should not be modified directly. Instead, copy and extend them or use composition patterns for JavaScript components.
+
+        #### Q: CSS styles aren't applying correctly
+        **Ans:** Check the CSS standards documentation and ensure you're following Tailwind-first patterns. Verify color contrast meets WCAG 2.2 requirements.
+
+        #### Q: Theme development server isn't working
+        **Ans:** 
+        - Ensure you have the correct Node.js version (check package.json)
+        - Verify your `shopify.theme.toml` is configured correctly
+        - Check CORS settings in `vite.config.ts` for custom domains
+        - On Windows, use two separate shells as documented
+
+        #### Q: Performance issues with sections
+        **Ans:** Use `sub-section-id` for granular updates instead of replacing entire sections. Only use `forceReplaceAll` when absolutely necessary.
+
+        #### Q: Icons not displaying
+        **Ans:** Prefer `{% render 'icon', ... %}` over the `svg-icon` web component unless you're integrating with third-party platforms or other web components.
+
+        ### 🚨 Before submitting
+        - [ ] I have checked the [documentation](../docs/README.md)
+        - [ ] I have read the [common questions](../docs/common-questions.md)
+        - [ ] I have searched existing issues for similar problems
+        - [ ] I have provided all the requested information above

@@ -1,0 +1,64 @@
+{%- liquid
+  assign show_currency = false
+  assign show_language = false
+
+  if section.settings.enable_country_selector and localization.available_countries.size > 1
+    assign show_currency = true
+  endif
+
+  if section.settings.enable_language_selector and localization.available_languages.size > 1
+    assign show_language = true
+  endif
+-%}
+
+{%- capture color_scheme -%}
+  {%- render '@color-scheme', color_scheme: section.settings.color_scheme -%}
+{%- endcapture -%}
+
+{%- if show_currency or show_language -%}
+  <div class='px-pagemargin py-xs {{ color_scheme }}'>
+    <div class='2xl:container flex justify-start gap-sm w-full'>
+      {%- if show_currency -%}
+        {% render 'i18n-select', type: 'currency', class: color_scheme %}
+      {%- endif -%}
+      {%- if show_language -%}
+        {% render 'i18n-select', type: 'language', class: color_scheme %}
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:sections.footer_localization.name",
+  "limit": 1,
+  "enabled_on": {
+    "groups": ["footer"]
+  },
+  "presets": [
+    {
+      "name": "t:sections.footer_localization.name"
+    }
+  ],
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_country_selector",
+      "default": true,
+      "label": "t:sections.footer_localization.settings.enable_country_selector.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_language_selector",
+      "default": true,
+      "label": "t:sections.footer_localization.settings.enable_language_selector.label"
+    }
+  ]
+}
+{% endschema %}

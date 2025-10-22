@@ -1,0 +1,144 @@
+{% comment %}
+  Renders a carousel of product cards.
+
+  Accepts:
+    - slides: An array of HTML for the slides to display in the carousel {object}
+    - products: An array of products to render in the carousel {product[]}.
+    - limit: A limit of how many products to render {number}.
+    - section_settings: An object containing settings for the carousel {object}.
+
+  Usage:
+    {%- render 'product-cards-carousel', products: recommendations.products -%}
+{% endcomment %}
+
+{% liquid
+  assign limit = limit | default: products.size
+%}
+
+{%- capture children -%}
+  {%- if slides != blank -%}
+    {%- for slide in slides limit: limit -%}
+      <div
+        class='core-carousel-slide'
+        role='group'
+        aria-label='{{ forloop.index }} of {{ forloop.length }}'
+        aria-roledescription='slide'
+        data-carousel-slide
+      >
+        {{- slide -}}
+      </div>
+    {%- endfor -%}
+  {%- elsif products != blank -%}
+    {%- for product in products limit: limit -%}
+      <div
+        class='core-carousel-slide'
+        role='group'
+        aria-label='{{ forloop.index }} of {{ forloop.length }}'
+        aria-roledescription='slide'
+        data-carousel-slide
+      >
+        {%- render 'product-card',
+          product: product,
+          media_aspect_ratio: 'portrait',
+          lazy_load: true,
+          class: 'h-full'
+        -%}
+      </div>
+    {%- endfor -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- if children != blank -%}
+  {% render '@needs-script', entries: 'core-carousel' %}
+
+  {% assign width = 100.0 | divided_by: section_settings.items_to_show | append: '%' %}
+  {% assign mobile_width = 100 | divided_by: section_settings.items_to_show_mobile | append: 'vw' %}
+
+  {% assign number_of_gaps = section_settings.items_to_show | minus: 1.0 %}
+  {% assign number_of_gaps = number_of_gaps | divided_by: section_settings.items_to_show %}
+  <style>
+    .core-carousel--{{ section_id }} {
+      --core-carousel-slide-width: {{ mobile_width }};
+      --core-carousel-slide-gap-per-slide: {{ section_settings.gap | times: number_of_gaps }}px;
+      --core-carousel-gap: {{ section_settings.gap }}px;
+    }
+    @media screen and (min-width: 768px) {
+      .core-carousel--{{ section_id }} {
+        --core-carousel-slide-width: {{ width }};
+        --core-carousel-slide-gap-per-slide: {{ section_settings.gap | times: number_of_gaps }}px;
+      }
+    }
+  </style>
+
+  <core-carousel
+    role='group'
+    aria-label='{{ section_settings.title | default: 'product carousel' | append: section.index }}'
+    class='core-carousel--{{ section_id }}'
+    data-items-to-show='{{ section_settings.items_to_show }}'
+    data-items-to-show-mobile='{{ section_settings.items_to_show_mobile }}'
+    data-items-to-scroll='{{ section_settings.items_to_scroll }}'
+    {% if section_settings.items_to_scroll > 1 %}
+      data-multi-scroll
+    {% endif %}
+    {% if section_settings.carousel_mobile_only %}
+      data-is-mobile-only='true'
+    {% endif %}
+    {% if section_settings.carousel_desktop_only %}
+      data-is-desktop-only='true'
+    {% endif %}
+  >
+    {% if section_settings.show_dots %}
+      <div
+        class='core-carousel-nav-dots'
+        role='group'
+        aria-label='Choose slide to display'
+        data-nav-dots-wrapper
+      ></div>
+    {% endif %}
+
+    {% if section_settings.show_arrows %}
+      <div class='flex items-center justify-end gap-xs mb-sm'>
+        <button
+          class='core-carousel-button core-carousel-button-prev'
+          data-carousel-prev
+          {% if section_settings.loop == false %}
+            disabled
+          {% endif %}
+          aria-label='{{ 'general.slider.previous_slide' | t }}'
+        >
+          {% render 'icon' with 'icon-arrow', class: 'rotate-180' %}
+        </button>
+
+        {% if section_settings.show_page_counter %}
+          <div class='core-carousel-page-counter' aria-live='polite' data-page-counter>1 / 1</div>
+        {% endif %}
+        <button
+          class='core-carousel-button core-carousel-button-next'
+          data-carousel-next
+          aria-label='{{ 'general.slider.next_slide' | t }}'
+        >
+          {% render 'icon' with 'icon-arrow', class: '' %}
+        </button>
+      </div>
+    {% endif %}
+
+    {% if section_settings.show_progress_bar %}
+      <div
+        class='core-carousel-progress'
+        data-progress
+      >
+        <div class='core-carousel-progress-thumb'></div>
+      </div>
+    {% endif %}
+    <div class='-mr-pagemargin lg:mr-0'>
+      <div
+        class='core-carousel-slides pr-pagemargin lg:pr-0'
+        aria-atomic='false'
+        aria-live='polite'
+        data-carousel-slides
+      >
+        {{- children -}}
+      </div>
+    </div>
+  </core-carousel>
+{%- endif -%}

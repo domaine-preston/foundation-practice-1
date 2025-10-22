@@ -1,0 +1,111 @@
+{% comment %}
+  Main site footer with navigation links, social media, newsletter signup, and app integrations.
+  Provides responsive grid layout with flexible column arrangement for different content blocks.
+
+  Features:
+  - Multi-column navigation menus
+  - Social media links
+  - Newsletter subscription
+  - Contact information
+  - App block integration
+  - Copyright and legal links
+  - Responsive layout (12-column grid system)
+
+  Layout structure:
+  - Left side: Navigation menus and links (8 columns on desktop)
+  - Right side: Newsletter and social (4 columns on desktop)
+  - App blocks: Integrated throughout
+  - Mobile: Stacked single column layout
+
+  Schema settings control:
+  - Background and text colors
+  - Navigation menu assignments
+  - Social media links
+  - Newsletter settings
+  - Contact information display
+
+  Dependencies:
+  - App blocks for third-party integrations
+  - Newsletter form functionality
+  - Social media icon rendering
+{% endcomment %}
+
+{%- capture color_scheme -%}
+  {%- render '@color-scheme', color_scheme: section.settings.color_scheme -%}
+{%- endcapture -%}
+
+<div class='px-pagemargin py-lg grid grid-cols-1 gap-md {{ color_scheme }}'>
+  <div class='grid gap-md 2xl:container'>
+    {%- content_for 'blocks' -%}
+  </div>
+
+  {%- if section.settings.show_social -%}
+    {%- assign platforms = 'twitter, facebook, instagram' | split: ', ' -%}
+    {%- capture social_links -%}
+      {%- for platform in platforms -%}
+        {%- assign setting = 'social_' | append: platform | append: '_link' -%}
+        {%- assign locale = 'general.social.links.' | append: platform -%}
+        {%- if settings[setting] != blank -%}
+          <li class='w-5'>
+            <a href='{{ settings[setting] }}' class='' aria-describedby='a11y-external-message'>
+              <svg-icon src="icon-{{ platform }}" class='text-[inherit] hover:text-foreground'></svg-icon>
+              <span class='sr-only'>{{ locale | t }}</span>
+            </a>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endcapture -%}
+
+    {%- if social_links != blank -%}
+      <ul class='flex items-center justify-start 2xl:container gap-sm flex-wrap' role='list'>
+        {{- social_links -}}
+      </ul>
+    {%- endif -%}
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.footer.name",
+  "limit": 1,
+  "enabled_on": {
+    "groups": ["footer"]
+  },
+  "presets": [
+    {
+      "name": "t:sections.footer.name"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "core-menu"
+    },
+    {
+      "type": "core-group"
+    },
+    {
+      "type": "core-heading"
+    },
+    {
+      "type": "core-text"
+    }
+  ],
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_social",
+      "default": false,
+      "label": "t:sections.footer.settings.show_social.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    }
+  ]
+}
+{% endschema %}

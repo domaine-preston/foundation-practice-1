@@ -1,0 +1,25 @@
+{% doc %}
+  Renders a text block with the appropriate text color and spacing based on the block's settings.
+
+  @param {object} block - block object containing settings. If block.settings.heading_style is set, it will apply that style to the text block.
+
+  @example
+  {% render 'core-text', block: block %}
+{% enddoc %}
+
+{%- capture spacing_token -%}
+  {%- render '@spacing-padding', spacing_settings: block.settings, default_token: 'p-sm' -%}
+{%- endcapture -%}
+
+{%- capture heading_style -%}
+  {%- if block.settings.heading_style != blank -%}
+    {{ block.settings.heading_style }}
+  {%- endif -%}
+{%- endcapture -%}
+<div
+  class='{{- heading_style | append: ' ' | append: spacing_token | append: ' text-block' | strip_newlines -}}'
+  id='{{ block.id }}'
+  {{ block.shopify_attributes }}
+>
+  {{- block.settings.text }}
+</div>

@@ -1,0 +1,36 @@
+{%- capture liquid -%}
+{%- if block.settings.liquid != blank -%}
+  {{- block.settings.liquid -}}
+{%- endif -%}
+{%- endcapture -%}
+
+<!-- @@variant/split -->
+{%- comment -%}
+  Desktop variant
+{%- endcomment -%}
+{{- liquid -}}
+
+<!-- @@variant/split -->
+{%- comment -%}
+  Mobile variant
+{%- endcomment -%}
+{{- liquid -}}
+
+{%- schema -%}
+{
+  "name": "t:sections.liquid.presets.name",
+  "settings": [
+    {
+      "type": "liquid",
+      "id": "liquid",
+      "label": "t:sections.liquid.presets.name"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.liquid.presets.name",
+      "category": "t:preset_categories.core-basic"
+    }
+  ]
+}
+{%- endschema -%}

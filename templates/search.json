@@ -1,0 +1,16 @@
+{
+  "sections": {
+    "main_search_hero": {
+      "type": "main-search-hero",
+      "name": "t:sections.main-search-hero.name",
+      "settings": {}
+    },
+    "main_product_grid": {
+      "type": "main-search-product-grid"
+    }
+  },
+  "order": [
+    "main_search_hero",
+    "main_product_grid"
+  ]
+}

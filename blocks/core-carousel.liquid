@@ -1,0 +1,527 @@
+{% # theme-check-disable CaptureOnContentForBlock %}
+{%- liquid
+  assign mod_settings = block.settings
+  assign section_id = block.id
+-%}
+{% render '@needs-script', entries: 'core-carousel' %}
+
+{% assign width = 100.0 | divided_by: mod_settings.items_to_show | append: '%' %}
+{% assign number_of_gaps = mod_settings.items_to_show | minus: 1.0 %}
+{% assign number_of_gaps = number_of_gaps | divided_by: mod_settings.items_to_show %}
+{% assign mobile_width = '61vw' %}
+{% comment %} {% assign mobile_number_of_gaps = 1 %} {% endcomment %}
+{% if mod_settings.items_to_show_mobile > 0 %}
+  {% assign mobile_width = 100.0 | divided_by: mod_settings.items_to_show_mobile | append: '%' %}
+{% endif %}
+<style>
+  .core-carousel--{{ section_id }} {
+    --core-carousel-slide-width: {{ mobile_width  }};
+    --core-carousel-slide-gap-per-slide: {{ mod_settings.slides_gap | times: number_of_gaps }}px;
+    --core-carousel-gap: {{ mod_settings.slides_gap }}px;
+
+  }
+
+  @media screen and (min-width: 768px) {
+    .core-carousel--{{ section_id }} {
+      --core-carousel-slide-width: {{ width }};
+      --core-carousel-slide-gap-per-slide: {{ mod_settings.slides_gap | times: number_of_gaps }}px;
+    }
+  }
+</style>
+
+{%- capture color_scheme -%}
+  {%- render '@color-scheme', color_scheme: section.settings.color_scheme -%}
+{%- endcapture -%}
+
+<core-carousel
+  role='group'
+  id='carousel-{{ block.id }}'
+  aria-label='{{ mod_settings.title | default: 'image carousel' | append: section.index }}'
+  class='core-carousel--{{ section_id }} {{ color_scheme }}'
+  data-items-to-scroll='{{ mod_settings.items_to_scroll_desktop }}'
+  data-items-to-show='{{ mod_settings.items_to_show }}'
+  data-items-to-show-mobile='{{ mod_settings.items_to_show_mobile }}'
+  {% if mod_settings.connected_carousels %}
+    connected-carousels='{{ mod_settings.connected_carousels }}'
+  {% endif %}
+  {% if mod_settings.items_to_scroll > 1 %}
+    data-multi-scroll
+  {% endif %}
+  {% if mod_settings.loop %}
+    data-loop='true'
+  {% endif %}
+  {% if mod_settings.enable_auto_rotate and mod_settings.rotate_speed > 0 %}
+    data-slide-interval='{{ mod_settings.rotate_speed | times: 1000 }}'
+  {% endif %}
+  {{ block.shopify_attributes }}
+>
+  {% comment %} Dots, above or overlaid {% endcomment %}
+  {% capture dots %}
+    {%- content_for 'block', type: '_core-carousel-dots', id: 'carousel-dots' -%}
+  {% endcapture %}
+
+  {% if dots contains 'position-above' or dots contains 'position-overlay' %}
+    {{ dots }}
+  {% endif %}
+
+  {% comment %} Page counter, above or overlaid {% endcomment %}
+  {% capture page_count %}
+    {%- content_for 'block', type: '_core-carousel-page-count', id: 'carousel-page-count', loop: mod_settings.loop -%}
+  {% endcapture %}
+
+  {% if page_count contains 'position-above' or page_count contains 'position-overlay' %}
+    {{ page_count }}
+  {% endif %}
+
+  {% comment %} Arrows, above or overlaid {% endcomment %}
+  {% capture arrows %}
+    {%- content_for 'block', type: '_core-carousel-arrows', id: 'carousel-arrows', loop: mod_settings.loop -%}
+  {% endcapture %}
+
+  {% if arrows contains 'position-above' or arrows contains 'position-overlay' %}
+    {{ arrows }}
+  {% endif %}
+
+  {%- capture slides_content -%}
+    {%- content_for 'blocks' -%}
+  {%- endcapture -%}
+
+  {%- capture gap_token -%}
+    {%- render '@gap-token', value: mod_settings.slides_gap -%}
+  {%- endcapture -%}
+
+  <div
+    class='core-carousel-slides {{ gap_token | strip | strip_newlines }}'
+    aria-atomic='false'
+    aria-live='{% if mod_settings.enable_auto_rotate %}off{% else %}polite{% endif %}'
+    data-carousel-slides
+  >
+    {{ slides_content }}
+  </div>
+
+  {% if page_count contains 'position-below' %}
+    {{ page_count }}
+  {% endif %}
+
+  {% if dots contains 'position-below' %}
+    {{ dots }}
+  {% endif %}
+
+  {% if arrows contains 'position-below' %}
+    {{ arrows }}
+  {% endif %}
+
+  {% if mod_settings.show_progress_bar %}
+    {%- content_for 'block', type: '_core-carousel-progress-bar', id: 'carousel-progress-bar' -%}
+  {% endif %}
+</core-carousel>
+{% # theme-check-enable CaptureOnContentForBlock %}
+
+{% schema %}
+{
+  "name": "t:names.core-carousel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_auto_rotate",
+      "label": "t:sections.image-carousel.settings.enable_auto_rotate.label",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "rotate_speed",
+      "min": 3,
+      "max": 9,
+      "step": 1,
+      "label": "t:sections.image-carousel.settings.rotate_speed.label",
+      "unit": "t:sections.image-carousel.settings.rotate_speed.unit",
+      "default": 5,
+      "visible_if": "{{ block.settings.enable_auto_rotate }}"
+    },
+    {
+      "type": "number",
+      "id": "slides_gap",
+      "label": "t:settings.slides_gap",
+      "default": 0
+    },
+    {
+      "type": "number",
+      "id": "items_to_scroll_desktop",
+      "default": 4,
+      "label": "t:settings.items_to_scroll_desktop"
+    },
+    {
+      "type": "number",
+      "id": "items_to_show",
+      "default": 4,
+      "label": "t:settings.items_to_show"
+    },
+    {
+      "type": "number",
+      "id": "items_to_show_mobile",
+      "default": 1,
+      "label": "t:settings.items_to_show_mobile"
+    },
+    {
+      "type": "checkbox",
+      "id": "loop",
+      "label": "t:settings.loop",
+      "default": true,
+      "visible_if": "{{ block.settings.items_to_show  == 1 }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_progress_bar",
+      "label": "t:sections.image-carousel.settings.show_progress_bar.label",
+      "default": false
+    },
+    {
+      "type": "textarea",
+      "id": "connected_carousels",
+      "label": "Connected Carousels",
+      "info": "Comma-separated list of connected carousel IDs",
+      "placeholder": "carousel-1, carousel-2"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "_carousel-card"
+    },
+    {
+      "type": "_carousel-slide"
+    },
+    {
+      "type": "_core-carousel-dots"
+    },
+    {
+      "type": "_core-carousel-arrows"
+    },
+    {
+      "type": "_core-carousel-progress-bar"
+    },
+    {
+      "type": "_core-carousel-page-count"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.core-carousel",
+      "category": "t:preset_categories.core-basic",
+      "settings": {
+        "enable_auto_rotate": false,
+        "rotate_speed": 5,
+        "slides_gap": 0,
+        "items_to_scroll_desktop": 1,
+        "items_to_show": 1,
+        "items_to_show_mobile": 1
+      },
+      "blocks": {
+        "carousel_slide_GG79NB": {
+          "type": "_carousel-slide",
+          "name": "t:names.core-carousel-slide",
+          "settings": {},
+          "blocks": {
+            "core_group_Y7PnzB": {
+              "type": "core-group",
+              "name": "Media",
+              "settings": {
+                "overlay_container": true,
+                "overlay_on_desktop": false,
+                "overlay_on_mobile": false,
+                "content_direction": "flex-col",
+                "text_alignment": "text-start",
+                "vertical_on_mobile": true,
+                "horizontal_alignment": "justify-start",
+                "vertical_alignment": "items-center",
+                "align_baseline": false,
+                "horizontal_alignment_flex_direction_column": "items-start",
+                "vertical_alignment_flex_direction_column": "justify-center",
+                "gap": 2,
+                "padding_top": 0,
+                "padding_inline_end": 0,
+                "padding_bottom": 0,
+                "padding_inline_start": 0,
+                "use_custom_width": false,
+                "custom_width": 100,
+                "custom_width_mobile": 100
+              },
+              "blocks": {
+                "core_image_wDceap": {
+                  "type": "core-image",
+                  "name": "t:names.core-image",
+                  "settings": {
+                    "desktop_image": "shopify://shop_images/5c8f7e13aaa6b9c71fd6939aebe5d0a4398d0017.png",
+                    "link": "",
+                    "image_ratio": "aspect-video",
+                    "image_fit": "cover",
+                    "use_custom_spacing": false,
+                    "padding_top": 0,
+                    "padding_inline_end": 0,
+                    "padding_bottom": 0,
+                    "padding_inline_start": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": ["core_image_wDceap"]
+            },
+            "core_group_GGjwjR": {
+              "type": "core-group",
+              "name": "Content",
+              "settings": {
+                "overlay_container": false,
+                "overlay_on_desktop": true,
+                "overlay_on_mobile": false,
+                "content_direction": "flex-col",
+                "text_alignment": "text-start",
+                "vertical_on_mobile": true,
+                "horizontal_alignment": "justify-start",
+                "vertical_alignment": "items-center",
+                "align_baseline": false,
+                "horizontal_alignment_flex_direction_column": "items-start",
+                "vertical_alignment_flex_direction_column": "justify-center",
+                "gap": 0,
+                "padding_top": 4,
+                "padding_inline_end": 4,
+                "padding_bottom": 4,
+                "padding_inline_start": 4,
+                "use_custom_width": false,
+                "custom_width": 100,
+                "custom_width_mobile": 100
+              },
+              "blocks": {
+                "core_group_mPwBph": {
+                  "type": "core-group",
+                  "name": "t:names.core-group",
+                  "settings": {
+                    "overlay_container": true,
+                    "overlay_on_desktop": false,
+                    "overlay_on_mobile": false,
+                    "content_direction": "flex-col",
+                    "text_alignment": "text-start",
+                    "vertical_on_mobile": true,
+                    "horizontal_alignment": "justify-start",
+                    "vertical_alignment": "items-center",
+                    "align_baseline": false,
+                    "horizontal_alignment_flex_direction_column": "items-start",
+                    "vertical_alignment_flex_direction_column": "justify-center",
+                    "gap": 1,
+                    "padding_top": 0,
+                    "padding_inline_end": 0,
+                    "padding_bottom": 0,
+                    "padding_inline_start": 0,
+                    "use_custom_width": true,
+                    "custom_width": 31,
+                    "custom_width_mobile": 100
+                  },
+                  "blocks": {
+                    "core_heading_mnBMLU": {
+                      "type": "core-heading",
+                      "name": "t:names.core-heading",
+                      "settings": {
+                        "heading_style": "h1",
+                        "text": "<p>Find your natural glow.</p>",
+                        "use_custom_spacing": true,
+                        "padding_top": 0,
+                        "padding_inline_end": 0,
+                        "padding_bottom": 0,
+                        "padding_inline_start": 0
+                      },
+                      "blocks": {}
+                    },
+                    "core_text_JAjdCz": {
+                      "type": "core-text",
+                      "name": "t:names.core-text",
+                      "settings": {
+                        "text": "<p>Our mission is to enrich everyday life through a diverse range of high-quality home goods, electronics, and apparel. </p>",
+                        "use_custom_spacing": true,
+                        "padding_top": 0,
+                        "padding_inline_end": 0,
+                        "padding_bottom": 3,
+                        "padding_inline_start": 0
+                      },
+                      "blocks": {}
+                    }
+                  },
+                  "block_order": ["core_heading_mnBMLU", "core_text_JAjdCz"]
+                },
+                "core_button_8MdNHP": {
+                  "type": "core-button",
+                  "name": "t:names.core-button",
+                  "settings": {
+                    "text": "Primary Button",
+                    "link": "",
+                    "open_in_new_tab": false,
+                    "style": "primary",
+                    "button_width": "auto",
+                    "min_width": 25
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": ["core_group_mPwBph", "core_button_8MdNHP"]
+            }
+          },
+          "block_order": ["core_group_Y7PnzB", "core_group_GGjwjR"]
+        },
+        "carousel_slide_ewWhUt": {
+          "type": "_carousel-slide",
+          "name": "t:names.core-carousel-slide",
+          "settings": {},
+          "blocks": {
+            "core_group_LVGR37": {
+              "type": "core-group",
+              "name": "Media",
+              "settings": {
+                "overlay_container": true,
+                "overlay_on_desktop": false,
+                "overlay_on_mobile": false,
+                "content_direction": "flex-col",
+                "text_alignment": "text-start",
+                "vertical_on_mobile": true,
+                "horizontal_alignment": "justify-start",
+                "vertical_alignment": "items-center",
+                "align_baseline": false,
+                "horizontal_alignment_flex_direction_column": "items-start",
+                "vertical_alignment_flex_direction_column": "justify-center",
+                "gap": 2,
+                "padding_top": 0,
+                "padding_inline_end": 0,
+                "padding_bottom": 0,
+                "padding_inline_start": 0,
+                "use_custom_width": false,
+                "custom_width": 100,
+                "custom_width_mobile": 100
+              },
+              "blocks": {
+                "core_image_AVftDc": {
+                  "type": "core-image",
+                  "name": "t:names.core-image",
+                  "settings": {
+                    "desktop_image": "shopify://shop_images/5c8f7e13aaa6b9c71fd6939aebe5d0a4398d0017.png",
+                    "link": "",
+                    "image_ratio": "aspect-video",
+                    "image_fit": "cover",
+                    "use_custom_spacing": false,
+                    "padding_top": 0,
+                    "padding_inline_end": 0,
+                    "padding_bottom": 0,
+                    "padding_inline_start": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": ["core_image_AVftDc"]
+            },
+            "core_group_wb8dTL": {
+              "type": "core-group",
+              "name": "Content",
+              "settings": {
+                "overlay_container": false,
+                "overlay_on_desktop": true,
+                "overlay_on_mobile": false,
+                "content_direction": "flex-col",
+                "text_alignment": "text-center",
+                "vertical_on_mobile": true,
+                "horizontal_alignment": "justify-start",
+                "vertical_alignment": "items-center",
+                "align_baseline": false,
+                "horizontal_alignment_flex_direction_column": "items-center",
+                "vertical_alignment_flex_direction_column": "justify-center",
+                "gap": 0,
+                "padding_top": 4,
+                "padding_inline_end": 4,
+                "padding_bottom": 4,
+                "padding_inline_start": 4,
+                "use_custom_width": false,
+                "custom_width": 100,
+                "custom_width_mobile": 100
+              },
+              "blocks": {
+                "core_group_RRh89W": {
+                  "type": "core-group",
+                  "name": "Text Box",
+                  "settings": {
+                    "overlay_container": true,
+                    "overlay_on_desktop": false,
+                    "overlay_on_mobile": false,
+                    "content_direction": "flex-col",
+                    "text_alignment": "text-center",
+                    "vertical_on_mobile": true,
+                    "horizontal_alignment": "justify-start",
+                    "vertical_alignment": "items-center",
+                    "align_baseline": false,
+                    "horizontal_alignment_flex_direction_column": "items-center",
+                    "vertical_alignment_flex_direction_column": "justify-center",
+                    "gap": 1,
+                    "padding_top": 0,
+                    "padding_inline_end": 0,
+                    "padding_bottom": 0,
+                    "padding_inline_start": 0,
+                    "use_custom_width": true,
+                    "custom_width": 31,
+                    "custom_width_mobile": 100
+                  },
+                  "blocks": {
+                    "core_heading_edbmpd": {
+                      "type": "core-heading",
+                      "name": "t:names.core-heading",
+                      "settings": {
+                        "heading_style": "h1",
+                        "text": "<p>Find your natural glow.</p>",
+                        "use_custom_spacing": true,
+                        "padding_top": 0,
+                        "padding_inline_end": 0,
+                        "padding_bottom": 0,
+                        "padding_inline_start": 0
+                      },
+                      "blocks": {}
+                    },
+                    "core_text_WcFHWK": {
+                      "type": "core-text",
+                      "name": "t:names.core-text",
+                      "settings": {
+                        "text": "<p>Our mission is to enrich everyday life through a diverse range of high-quality home goods, electronics, and apparel. </p>",
+                        "use_custom_spacing": true,
+                        "padding_top": 0,
+                        "padding_inline_end": 0,
+                        "padding_bottom": 3,
+                        "padding_inline_start": 0
+                      },
+                      "blocks": {}
+                    }
+                  },
+                  "block_order": ["core_heading_edbmpd", "core_text_WcFHWK"]
+                },
+                "core_button_UAdxPx": {
+                  "type": "core-button",
+                  "name": "t:names.core-button",
+                  "settings": {
+                    "text": "Primary Button",
+                    "link": "",
+                    "open_in_new_tab": false,
+                    "style": "primary",
+                    "button_width": "auto",
+                    "min_width": 25
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": ["core_group_RRh89W", "core_button_UAdxPx"]
+            }
+          },
+          "block_order": ["core_group_LVGR37", "core_group_wb8dTL"]
+        }
+      },
+      "block_order": ["carousel_slide_GG79NB", "carousel_slide_ewWhUt"]
+    }
+  ]
+}
+{% endschema %}

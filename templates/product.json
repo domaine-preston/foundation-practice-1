@@ -1,0 +1,160 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "vendor": {
+          "type": "text",
+          "settings": {
+            "text": "{{ product.vendor }}",
+            "text_style": "uppercase"
+          }
+        },
+        "title": {
+          "type": "title"
+        },
+        "caption": {
+          "type": "text",
+          "settings": {
+            "text": "{{ product.metafields.descriptors.subtitle.value }}",
+            "text_style": "subtitle"
+          }
+        },
+        "price": {
+          "type": "price"
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "picker_type": "button"
+          }
+        },
+        "quantity_selector": {
+          "type": "quantity_selector"
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": true
+          }
+        },
+        "description": {
+          "type": "description"
+        },
+        "collapsible-row-0": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Materials",
+            "icon": "leather",
+            "content": "",
+            "page": ""
+          }
+        },
+        "collapsible-row-1": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Shipping & Returns",
+            "icon": "truck",
+            "content": "",
+            "page": ""
+          }
+        },
+        "collapsible-row-2": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Dimensions",
+            "icon": "ruler",
+            "content": "",
+            "page": ""
+          }
+        },
+        "collapsible-row-3": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Care Instructions",
+            "icon": "heart",
+            "content": "",
+            "page": ""
+          }
+        }
+      },
+      "block_order": [
+        "title",
+        "caption",
+        "price",
+        "variant_picker",
+        "quantity_selector",
+        "buy_buttons",
+        "description",
+        "collapsible-row-0",
+        "collapsible-row-1",
+        "collapsible-row-2",
+        "collapsible-row-3"
+      ],
+      "settings": {
+        "enable_sticky_info": true,
+        "media_size": "large",
+        "constrain_to_viewport": true,
+        "mobile_thumbnails": "hide",
+        "hide_variants": true,
+        "enable_video_looping": false,
+        "padding_top": 36,
+        "padding_bottom": 12
+      }
+    },
+    "product-recommendations": {
+      "type": "product-recommendations",
+      "blocks": {
+        "group": {
+          "static": true,
+          "type": "core-group",
+          "blocks": {
+            "title": {
+              "type": "core-heading",
+              "settings": {
+                "text": "<p>You may also like</p>",
+                "heading_style": "h2",
+                "use_custom_spacing": true
+              }
+            },
+            "desc": {
+              "type": "core-text",
+              "settings": {
+                "text": "<p>Our mission is to enrich everyday life through a diverse range of high-quality home goods, electronics, and apparel. </p>", 
+                "use_custom_spacing": true
+              }
+            },
+            "button": {
+              "type": "core-button",
+              "settings": {
+                "text": "Shop collection",
+                "link": "/",
+                "style": "tertiary"
+              }
+            }
+          },
+          "block_order": ["title", "desc", "button"]
+        },
+        "product-card": {
+          "type": "product-card",
+          "static": true,
+          "settings": {
+            "product": "{{ closest.product }}",
+            "media_aspect_ratio": "square"
+          },
+          "blocks": {}
+        }
+      },
+      "settings": {
+        "gap": 10,
+        "show_dots": false,
+        "show_progress_bar": false
+      }
+    },
+    "recently-viewed": {
+      "type": "recently-viewed"
+    }
+  },
+  "order": ["main", "product-recommendations", "recently-viewed"]
+}

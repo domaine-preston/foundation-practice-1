@@ -1,0 +1,52 @@
+{%- doc -%}
+  Displays a direct link in the header.
+
+  @param {string} link - The URL the link points to.
+  @param {string} title - The text to display for the link.
+  @param {string} [class] - The classes to apply to the link.
+  @param {boolean} [open_in_new_tab] - Whether to open the link in a new tab.
+  @param {string} [shopify_attributes] - Additional Shopify attributes to add to the link.
+  @param {boolean} [title_wrapper] - Whether to wrap the title in a span with utility class.
+  @param {boolean} [menu_trigger] - Whether to add the menu-trigger attribute to the link.
+{%- enddoc -%}
+
+{%- liquid
+  assign title_wrapper = title_wrapper | default: true, allow_false: true
+  assign menu_trigger = menu_trigger | default: true, allow_false: true
+-%}
+
+{%- capture children -%}
+  {%- if title_wrapper -%}
+    <span
+      class='utility{% if link == request.path %} header__active-menu-item{% endif %}'
+    >
+      {{- title | escape -}}
+    </span>
+  {%- else -%}
+      {{- title | escape -}}
+  {%- endif -%}
+{%- endcapture -%}
+
+<li>
+  <a
+    id='HeaderMenu-{{ link | handle }}'
+    href='{{ link }}'
+    class='{{ class }}'
+
+    {% if open_in_new_tab %}
+      target='_blank'
+    {% endif %}
+
+    {% if link == request.path %}
+      aria-current='page'
+    {% endif %}
+
+    {% if menu_trigger %}
+      menu-trigger
+    {% endif %}
+
+    {{ shopify_attributes }}
+  >
+    {{- children -}}
+  </a>
+</li>

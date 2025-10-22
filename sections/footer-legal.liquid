@@ -1,0 +1,102 @@
+{%- capture color_scheme -%}
+  {%- render '@color-scheme', color_scheme: section.settings.color_scheme -%}
+{%- endcapture -%}
+
+{% assign year = 'now' | date: '%Y' %}
+
+<div class='px-pagemargin py-xs {{ color_scheme }}'>
+  <div class='2xl:container flex justify-between flex-wrap'>
+    <div class='flex items-center justify-start gap-md lg:gap-xs flex-wrap'>
+      <p>{{ 'sections.footer.footer_legal' | t: year: year }}</p>
+      {%- if section.settings.menu.links != blank -%}
+        <nav class='p'>
+          {% for link in section.settings.menu.links %}
+            <span class='p mx-xs lg:mx-sm {% if forloop.first %}hidden lg:inline-block{% endif %}' aria-hidden='true'
+              >·</span
+            >
+            <a href='{{ link.url }}' class='p'>{{ link.title }}</a>
+          {% endfor %}
+        </nav>
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.show_payment_methods -%}
+      {%- assign payment_types = 'visa, mastercard, amex, discover' | split: ', ' -%}
+      {%- capture payment_icons -%}
+        {%- for payment_type in payment_types -%}
+          {%- assign payment_icon = 'payment-' | append: payment_type | append: '.png' | asset_url -%}
+          {%- if payment_icon != blank -%}
+            <li>
+              <img 
+                src='{{ payment_icon }}'
+                alt='{{ payment_type | capitalize }}'
+                loading='lazy'
+                width='36'
+                height='22'
+                class="mr-1"
+              />
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+    {%- endcapture -%}
+
+      {%- if payment_icons != blank -%}
+        <ul class='lg:hidden flex items-center justify-start flex-wrap my-md w-full' role='list'>
+          {{- payment_icons -}}
+        </ul>
+      {%- endif -%}
+    {%- endif -%}
+
+    {% if section.settings.show_localization_selectors %}
+      <div class='flex items-center gap-xs'>
+        {% if localization.available_countries.size > 1 %}
+          {% render 'i18n-select', type: 'currency', class: color_scheme %}
+        {% endif %}
+        {% if localization.available_languages.size > 1 %}
+          {% render 'i18n-select', type: 'language', class: color_scheme %}
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.footer_legal.name",
+  "limit": 1,
+  "enabled_on": {
+    "groups": ["footer"]
+  },
+  "presets": [
+    {
+      "name": "t:sections.footer_legal.name"
+    }
+  ],
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "t:sections.footer_legal.link_list.settings.menu.label",
+      "info": "t:sections.footer_legal.link_list.settings.menu.info"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_localization_selectors",
+      "label": "t:sections.footer_legal.show_localization_selectors.label",
+      "info": "t:sections.footer_legal.show_localization_selectors.info"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_methods",
+      "label": "t:sections.footer_legal.show_payment_methods.label",
+      "info": "t:sections.footer_legal.show_payment_methods.info"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    }
+  ]
+}
+{% endschema %}

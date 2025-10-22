@@ -1,0 +1,85 @@
+{% comment %}
+  Mobile navigation drawer providing hierarchical menu navigation.
+  Displays as a modal overlay with main navigation links and submenus.
+
+  Features:
+  - Collapsible menu structure with nested navigation
+  - Mobile-optimized touch interactions
+  - Account links and authentication controls
+  - Search functionality integration
+  - Accessibility-compliant modal behavior
+  - Smooth animations and transitions
+
+  Content structure:
+  - Primary navigation menu
+  - Secondary navigation links
+  - Account login/logout links
+  - Search bar integration
+  - Social media links (if configured)
+
+  Behavior:
+  - Opens from mobile menu toggle in header
+  - Closes on outside click or escape key
+  - Maintains scroll position
+  - Traps focus within drawer
+
+  Dependencies:
+  - Modal dialog functionality
+  - Navigation menu liquid objects
+  - Header drawer panels for submenu rendering
+  - Search form component
+
+  Schema settings control:
+  - Main navigation menu selection
+  - Secondary menu options
+  - Account link display
+  - Search integration toggles
+{% endcomment %}
+
+{%- render '@needs-script', entries: 'main-header.js' -%}
+{%- assign mod_settings = section.settings -%}
+{% capture menu_modal_content %}
+  <div id='menu-drawer' class='grid grid-cols-1 min-h-full grid-rows-[1fr,auto] pb-sm gap-y-sm'>
+    <nav aria-label='Main Menu Drawer'>
+      <ul class='list-none px-sm grid grid-cols-1 gap-y-sm'>
+        {{ children }}
+      </ul>
+    </nav>
+    <div class='grid grid-cols-1 gap-xs content-start px-sm'>
+      {%- if shop.customer_accounts_enabled -%}
+        <a
+          href='{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}'
+          class='btn'
+          variant='primary'
+        >
+          {% render 'icon' with 'icon-account', size: 18 %}
+          {%- liquid
+            if customer
+              echo 'customer.account_fallback' | t
+            else
+              echo 'customer.log_in' | t
+            endif
+          -%}
+        </a>
+      {%- endif -%}
+
+      {%- liquid
+        if localization.available_countries.size > 1 and mod_settings.enable_country_selector
+          render 'i18n-select', type: 'currency'
+        endif
+
+        if localization.available_languages.size > 1 and mod_settings.enable_language_selector
+          render 'i18n-select', type: 'language'
+        endif
+      -%}
+    </div>
+  </div>
+{% endcapture %}
+
+{% liquid
+  assign menu_title = 'sections.header.menu' | t
+  capture parent_class
+    echo color_scheme_class | prepend: 'bg-background text-foreground '
+  endcapture
+  render 'modal-dialog', id: 'mobile-menu-drawer', content: menu_modal_content, type: 'drawer', close_on_backdrop_click: true, without_title: true, title: menu_title, parent_class: parent_class
+%}

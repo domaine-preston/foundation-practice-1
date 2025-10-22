@@ -1,0 +1,148 @@
+{%- assign pick_up_availabilities = product_variant.store_availabilities | where: 'pick_up_enabled', true -%}
+{%- capture color_scheme -%}
+  {% render '@color-scheme', color_scheme: settings.pickup_availability_color_scheme %}
+{%- endcapture -%}
+{%- if pick_up_availabilities.size > 0 -%}
+  <div section-id='pickup-availability'>
+    <div class='flex flex-col mt-sm rounded bg-background-secondary'>
+      {% assign closest_location = pick_up_availabilities.first %}
+      <div class='p-xs flex gap-xs'>
+        {%- if closest_location.available -%}
+          <div class='flex gap-2xs w-full'>
+            <span class='svg-wrapper'>
+              {% render 'icon',
+                icon: 'icon-shopping-bag',
+                class: 'text-u-success bottom-[3px] relative fluid-w-[16|16] fluid-h-[16|16]'
+              %}
+            </span>
+            <div class='w-full'>
+              <div class='flex justify-between items-center flex-wrap gap-2xs'>
+                <p class='cursor-pointer'>
+                  {{
+                    'products.product.pickup_availability.pick_up_available_at_html'
+                    | t: location_name: closest_location.location.name
+                  }}
+                </p>
+                <span class='caption text-green'>• {{ closest_location.pick_up_time }}</span>
+              </div>
+              <div class='flex items-center gap-xs mt-2xs'>
+                <div class='flex gap-xs items-center'>
+                  {%- capture class -%}
+                    {{ color_scheme }} bg-transparent
+                  {%- endcapture -%}
+                  {% capture toggle_element %}
+                      <span class='p underline cursor-pointer text-foreground-secondary'>
+                        {{ 'products.product.pickup_availability.view_store_info' | t }}
+                      </span>
+                    {% endcapture %}
+                  {% render 'modal-dialog-toggle',
+                    toggle_element: toggle_element,
+                    modal_id: 'pickup-availability',
+                    class: class
+                  %}
+                  {% if pick_up_availabilities.size > 1 %}
+                    <span class='p text-foreground-secondary'>|</span>
+                    <a
+                      href='#modal-dialog://pickup-availability'
+                      class='p underline text-foreground-secondary'
+                    >
+                      {{- 'products.product.pickup_availability.check_other_stores' | t -}}
+                    </a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {%- else -%}
+          <div class='flex gap-xs'>
+            <span class='svg-wrapper'>
+              {% render 'icon',
+                icon: 'icon-close',
+                class: 'text-u-error top-px relative fluid-w-[14|14] fluid-h-[14|14]'
+              %}
+            </span>
+            <div class='flex flex-col gap-2xs'>
+              <p>
+                {{
+                  'products.product.pickup_availability.pick_up_unavailable_at_html'
+                  | t: location_name: closest_location.location.name
+                }}
+              </p>
+
+              {% if pick_up_availabilities.size > 1 %}
+                {% capture check_other_stores %}
+                  <span class='p underline cursor-pointer text-foreground-secondary'>
+                    {{ 'products.product.pickup_availability.check_other_stores' | t }}
+                  </span>
+                {% endcapture %}
+                {% render 'modal-dialog-toggle', toggle_element: check_other_stores, modal_id: 'pickup-availability' %}
+              {% endif %}
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+    {% capture modal_content %}
+      {%- unless product_variant.product.has_only_default_variant -%}
+        <div class='caption grid grid-cols-1 p-sm gap-2xs'>
+          <p class="h6 mb-xs">{{  product_variant.product.title | append: ' | ' | append:  product_variant.title}}</p>
+          {%- for product_option in product_variant.product.options_with_values -%}
+            <div>
+              {{ product_option.name | escape }}:&nbsp;
+              {%- for value in product_option.values -%}
+                {%- if product_option.selected_value == value -%}
+                  <span>{{ value | escape }}</span>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endunless -%}
+
+      <ul class='pickup-availability-list divide-y divide-border-02 px-sm' role='list'>
+        {%- for availability in pick_up_availabilities -%}
+          <li class="py-xs flex flex-col">
+            <h3 class='h6 mb-xs'>{{ availability.location.name | escape }}</h3>
+            <div class='caption self-start gap-1 inline-flex items-center bg-background-secondary text-foreground-secondary rounded-full py-1 px-xs mb-sm'>
+              {%- if availability.available -%}
+                <span class='svg-wrapper'>
+                  {%  render 'icon', icon: 'icon-checkmark', size: 10, class: 'text-u-success top-px relative' %}
+                </span>
+                {{ 'products.product.pickup_availability.pick_up_available' | t }},
+                {{ availability.pick_up_time | downcase }}
+                {% else %}
+                <span class='svg-wrapper'>
+                  {%  render 'icon', icon: 'icon-close', size: 10, class: 'text-u-error top-px relative' %}
+                </span>
+                {{ 'products.product.pickup_availability.pick_up_unavailable' | t }}
+              {%- endif -%}
+            </div>
+
+            {%- assign address = availability.location.address -%}
+            <address class='pickup-availability-address'>
+              {{ address | format_address }}
+
+              {%- if address.phone.size > 0 -%}
+                <p>{{ address.phone }}</p>
+              {%- endif -%}
+            </address>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {% endcapture %}
+    {%- assign modal_title = 'products.product.pickup_availability.pick_up_available' | t -%}
+    {%- capture parent_class -%}
+      {{ color_scheme }}
+    {%- endcapture -%}
+    {%- render 'modal-dialog',
+      type: 'drawer',
+      title: modal_title,
+      content: modal_content,
+      id: 'pickup-availability',
+      anchor: 'right',
+      header_classes: 'bg-background border-b border-b-border-secondary',
+      parent_class: parent_class,
+      without_close: false
+    -%}
+  </div>
+{%- endif -%}

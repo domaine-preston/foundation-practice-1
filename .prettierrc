@@ -1,0 +1,23 @@
+{
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "semi": false,
+  "singleQuote": true,
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "importOrderParserPlugins": ["typescript", "decorators-legacy"],
+  "tailwindStylesheet": "./src/styles/index.css",
+  "plugins": [
+    "@shopify/prettier-plugin-liquid",
+    "@trivago/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss"
+  ],
+  "overrides": [
+    {
+      "files": ["*.jsonc", ".eslintrc", "tsconfig*.json"],
+      "options": {
+        "trailingComma": "none"
+      }
+    }
+  ]
+}

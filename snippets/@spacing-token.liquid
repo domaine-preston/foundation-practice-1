@@ -1,0 +1,112 @@
+{% doc %}
+  Returns TW spacing token value based on the provided numeric `value` parameter.
+
+  @param {number} [value] - The numeric value to convert to a spacing token
+  @param {string} [variant] - Spacing variant: 'px', 'py', 'pe', 'ps', 'pt', 'pb', 'mx', 'my', 'me', 'ms', 'mt', 'mb'
+
+  @example
+  {% render '@spacing-token', value: 4, variant: 'pt' %}
+{% enddoc %}
+{%- liquid
+  case value
+    when 0
+      case variant
+        when 'pe'
+          echo 'pe-0'
+        when 'ps'
+          echo 'ps-0'
+        when 'pb'
+          echo 'pb-0'
+        when 'pt'
+          echo 'pt-0'
+      endcase
+    when 1
+      case variant
+        when 'pe'
+          echo 'pe-2xs'
+        when 'ps'
+          echo 'ps-2xs'
+        when 'pb'
+          echo 'pb-2xs'
+        when 'pt'
+          echo 'pt-2xs'
+      endcase
+    when 2
+      case variant
+        when 'pe'
+          echo 'pe-xs'
+        when 'ps'
+          echo 'ps-xs'
+        when 'pb'
+          echo 'pb-xs'
+        when 'pt'
+          echo 'pt-xs'
+      endcase
+    when 3
+      case variant
+        when 'pe'
+          echo 'pe-sm'
+        when 'ps'
+          echo 'ps-sm'
+        when 'pb'
+          echo 'pb-sm'
+        when 'pt'
+          echo 'pt-sm'
+      endcase
+    when 4
+      case variant
+        when 'pe'
+          echo 'pe-md'
+        when 'ps'
+          echo 'ps-md'
+        when 'pb'
+          echo 'pb-md'
+        when 'pt'
+          echo 'pt-md'
+      endcase
+    when 5
+      case variant
+        when 'pe'
+          echo 'pe-lg'
+        when 'ps'
+          echo 'ps-lg'
+        when 'pb'
+          echo 'pb-lg'
+        when 'pt'
+          echo 'pt-lg'
+      endcase
+    when 6
+      case variant
+        when 'pe'
+          echo 'pe-xl'
+        when 'ps'
+          echo 'ps-xl'
+        when 'pb'
+          echo 'pb-xl'
+        when 'pt'
+          echo 'pt-xl'
+      endcase
+    when 7
+      case variant
+        when 'pe'
+          echo 'pe-2xl'
+        when 'ps'
+          echo 'ps-2xl'
+        when 'pb'
+          echo 'pb-2xl'
+        when 'pt'
+          echo 'pt-2xl'
+      endcase
+    when 8
+      case variant
+        when 'pe'
+          echo 'pe-3xl'
+        when 'ps'
+          echo 'ps-3xl'
+        when 'pb'
+          echo 'pb-3xl'
+        when 'pt'
+          echo 'pt-3xl'
+      endcase
+  endcase
+-%}

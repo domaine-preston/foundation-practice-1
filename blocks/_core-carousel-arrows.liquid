@@ -1,0 +1,85 @@
+{%- doc -%}
+  Displays carousel prev/next arrows
+
+  @param {boolean} [loop]
+{%- enddoc -%}
+
+{% if block != blank %}
+  {% assign loop = loop | default: false, allow_false: true %}
+
+  {%- capture vertical_position_classes -%}
+  {%- if block.settings.position == 'overlay' -%} absolute z-[2] {% if block.settings.container_width %} top-1/2 -translate-y-1/2 w-full {% else %} bottom-sm {% endif %} {%- else -%} relative {%- endif -%}
+{% endcapture %}
+
+  {%- capture horizonal_alignment_classes -%}
+  {%- if block.settings.alignment == 'left' -%} left-sm justify-start {%- endif -%}
+  {%- if block.settings.alignment == 'center' -%} left-1/2 -translate-x-1/2 justify-center {%- endif -%}
+  {%- if block.settings.alignment == 'right' -%} right-sm justify-end {%- endif -%}
+{%- endcapture -%}
+
+  <div
+    position-{{ block.settings.position }}
+    class='flex items-center gap-sm {{ vertical_position_classes }} {% if block.settings.container_width %} justify-between px-pagemargin {% else %} {{ horizonal_alignment_classes }} {% endif %}'
+  >
+    <button
+      class='core-carousel-button core-carousel-button-prev bg-(--button-primary-bg) text-(--button-primary-color)'
+      data-carousel-prev
+      {% if loop == false %}
+        disabled
+      {% endif %}
+    >
+      {% render 'icon', icon: 'icon-arrow', size: 16, class: 'rotate-180' %}
+    </button>
+    <button
+      class='core-carousel-button core-carousel-button-next bg-(--button-primary-bg) text-(--button-primary-color)'
+      data-carousel-next
+    >
+      {% render 'icon', icon: 'icon-arrow', size: 16 %}
+    </button>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Carousel Arrows",
+  "tag": null,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "container_width",
+      "label": "Container width",
+      "info": "If true, arrows are positioned at the edges of the carousel. If false, arrows are next to each other.",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Position",
+      "options": [
+        { "value": "above", "label": "Above" },
+        { "value": "below", "label": "Below" },
+        { "value": "overlay", "label": "overlay" }
+      ],
+      "default": "below"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center",
+      "info": "Only applies if 'Container width' is false."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carousel Arrows",
+      "category": "Carousel"
+    }
+  ]
+}
+{% endschema %}

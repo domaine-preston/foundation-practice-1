@@ -1,0 +1,67 @@
+{%- assign mod_settings = block.settings -%}
+
+{%- capture header_image_content -%}
+  <li>
+    <a href='{{ mod_settings.url }}' class='grid grid-cols-1 gap-xs'>
+      <div class='aspect-square relative'>
+        {%- render 'picture',
+          mobile_image: mod_settings.mobile_image,
+          image: mod_settings.desktop_image,
+          sizes: '100vw, (min-width: 1024px) 20vw',
+          object_fit: 'cover',
+          loading: 'lazy',
+          fetchpriority: 'low',
+          widths: '320, 640',
+          class: 'w-full h-full object-cover'
+        -%}
+      </div>
+      <p class='p pb-sm px-2xs sm:p-0'>{{ mod_settings.title }}</p>
+    </a>
+  </li>
+{%- endcapture -%}
+
+<!-- @@variant/split -->
+{%- comment -%}
+  Desktop variant
+{%- endcomment -%}
+{{- header_image_content -}}
+
+<!-- @@variant/split -->
+{%- comment -%}
+  Mobile variant
+{%- endcomment -%}
+{{- header_image_content -}}
+
+{% schema %}
+{
+  "name": "t:sections.header.blocks.image_content.name",
+  "tag": null,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "t:sections.header.blocks.image_content.mobile_image.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "desktop_image",
+      "label": "t:sections.header.blocks.image_content.desktop_image.label"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:sections.header.blocks.image_content.menu_title.label"
+    },
+    {
+      "type": "url",
+      "id": "url",
+      "label": "URL"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.header.blocks.image_content.name"
+    }
+  ]
+}
+{% endschema %}

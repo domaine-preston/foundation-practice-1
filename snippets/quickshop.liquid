@@ -1,0 +1,5 @@
+{%- render '@needs-script', entries: 'core-quickshop,core-main-product,core-swiper-with-media' -%}
+{%- assign title = 'products.product.quick_shop' | t -%}
+<quick-shop modal-id='quick-shop-modal'>
+  {% render 'modal-dialog', id: 'quick-shop-modal', anchor: 'right', title: title %}
+</quick-shop>

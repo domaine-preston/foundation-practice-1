@@ -1,0 +1,93 @@
+{% doc %}
+  Renders a predictive search form with real-time search suggestions.
+  Provides search input with autocomplete and accessible navigation.
+
+  Features:
+  - Predictive search with real-time suggestions
+  - Accessible form structure with proper ARIA labels
+  - Loading states and visual feedback
+  - Responsive design for mobile and desktop
+  - Search term highlighting and persistence
+  - Keyboard navigation support
+
+  Components:
+  - Search input field with placeholder text
+  - Submit button with search icon
+  - Predictive results dropdown
+  - Loading indicators
+
+  Dependencies:
+  - predictive-search.js for interactive functionality
+  - Shopify search API for suggestions
+  - Icon rendering for search button
+
+  @param {string} [input_id] - Unique ID for the search input
+  @param {string} [wrapper_class] - Additional CSS classes for wrapper
+
+  @example
+  {% render 'search-form', input_id: 'header-search', wrapper_class: 'hidden md:block' %}
+{% enddoc %}
+
+{%- liquid
+  assign input_placeholder = 'general.search.search' | t
+-%}
+{%- render '@needs-script', entries: 'predictive-search.js' -%}
+<predictive-search class='w-full md:relative md:max-w-[80%]' data-loading-text='{{ 'accessibility.loading' | t }}'>
+  <form
+    action='{{ routes.search_url }}'
+    method='get'
+    role='search'
+    data-form='{{ input_id }}'
+    class='grow'
+  >
+    <div class='relative flex gap-2 items-center' autofocus>
+      {% assign escaped_search_terms = search.terms | escape %}
+
+      {% capture input_attributes %}
+        role='combobox'
+        aria-expanded='false'
+        aria-owns='predictive-search-results'
+        aria-controls='predictive-search-results'
+        aria-haspopup='listbox'
+        aria-autocomplete='list'
+        autocorrect='off'
+        autocomplete='off'
+        autocapitalize='off'
+        spellcheck='false'
+      {% endcapture %}
+
+      {%- render 'form-field',
+        kind: 'input',
+        name: 'q',
+        id: input_id,
+        label: input_placeholder,
+        type: 'search',
+        value: escaped_search_terms,
+        autocomplete: 'off',
+        attributes: input_attributes,
+        wrapper_class: 'w-full [&_[data-slot=input]]:pr-lg'
+      -%}
+
+      <button
+        data-search-submit
+        type='submit'
+        class='absolute right-xs top-1/2 -translate-y-1/2 size-[18px] flex align-middle'
+      >
+        <span>{% render 'icon' with 'icon-search', size: 18 %}</span>
+        <span class='sr-only'>{{ 'general.search.search' | t }}</span>
+      </button>
+    </div>
+
+    <div
+      class='absolute top-full left-0 right-0 bg-background overflow-y-auto'
+      tabindex='-1'
+      data-predictive-search
+    >
+      {% comment %} {% render 'icon' with 'icon-spinner', size: 18 %} {% endcomment %}
+    </div>
+
+    <span id='predictive-search-status' class='visually-hidden' role='status' aria-hidden='true'></span>
+
+    <input type='hidden' name='options[prefix]' value='last'>
+  </form>
+</predictive-search>

@@ -1,0 +1,106 @@
+{%- liquid
+  assign fetch_priority = 'auto'
+  assign lazy_load = 'lazy'
+
+  if section.index == 1
+    assign fetch_priority = 'high'
+    assign lazy_load = 'eager'
+  endif
+
+  assign image_desktop = block.settings.image
+  assign image_mobile = block.settings.mobile_image | default: image_desktop
+-%}
+<div
+  class='core-carousel-slide aspect-square relative overflow-hidden'
+  role='group'
+  aria-label='{{ block.index }} of {{ section.blocks.size }}'
+  aria-roledescription='slide'
+  data-carousel-slide
+>
+  {% if image_mobile != blank and image_desktop != blank %}
+    {% render 'picture',
+      mobile_image: image_mobile,
+      image: image_desktop,
+      sizes: '25vw',
+      widths: '320, 640, 960, 1280',
+      object_fit: 'cover',
+      loading: lazy_load,
+      fetchpriority: fetch_priority,
+      class: 'absolute inset-0 w-full h-full'
+    %}
+  {% else %}
+    <div class='inset-0 w-full h-full absolute'>
+      {{ 'lifestyle-2' | placeholder_svg_tag: 'w-full h-full' }}
+    </div>
+  {% endif %}
+  {%- assign wrapper_element = 'div' -%}
+  {%- if block.settings.link != blank -%}
+    {%- assign wrapper_element = 'a' -%}
+  {%- endif -%}
+  <{{ wrapper_element }}
+    class='relative z-[1] w-full h-full grid grid-cols-1 items-end justify-start p-sm'
+    {% if block.settings.link != blank %}
+      href='{{ block.settings.link }}'
+
+      {% if block.settings.open_in_new_tab %}
+        target='_blank'
+      {% endif %}
+    {% endif %}
+  >
+    <div class='md:max-w-[75%]'>
+      {%- content_for 'block', id: 'title', type: 'core-heading' -%}
+    </div>
+  </{{ wrapper_element }}>
+</div>
+{% schema %}
+{
+  "name": "t:names.carousel-card",
+  "tag": null,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:content.desktop_image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "t:content.mobile_image"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:content.link"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_in_new_tab",
+      "label": "t:content.open_in_new_tab",
+      "default": false,
+      "visible_if": "{{ block.settings.link != blank }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.carousel-card",
+      "category": "t:preset_categories.core-basic",
+      "blocks": {
+        "title": {
+          "type": "core-heading",
+          "static": true,
+          "settings": {
+            "heading_style": "h4",
+            "text": "<p>Title</p>",
+            "use_custom_spacing": true,
+            "padding_top": 0,
+            "padding_inline_end": 0,
+            "padding_bottom": 0,
+            "padding_inline_start": 0
+          },
+          "blocks": {}
+        }
+      }
+    }
+  ]
+}
+{% endschema %}

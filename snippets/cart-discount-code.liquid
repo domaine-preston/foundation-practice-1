@@ -1,0 +1,22 @@
+{%- render '@needs-script', entries: 'core-cart-discount-code' -%}
+<cart-discount-code
+  class='grid grid-cols-1 gap-xs'
+  id='cart-discount-code'
+  cloak
+  generic-error-message='{{ 'general.cart.discount_error' | t }}'
+>
+  {%- form 'cart', cart -%}
+    <div class='flex w-full gap-2xs'>
+      {%- render 'form-field',
+        kind: 'input',
+        name: 'discount',
+        id: 'cart-discount-code',
+        placeholder: 'Enter discount code',
+        required: true,
+        value: '',
+        wrapper_class: 'flex-1'
+      -%}
+      <button class='btn !min-w-none' variant='primary'>{{ 'general.cart.discount_apply' | t }}</button>
+    </div>
+  {%- endform -%}
+</cart-discount-code>

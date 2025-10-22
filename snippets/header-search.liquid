@@ -1,0 +1,23 @@
+{%- doc -%}
+  Renders a search form.
+
+  @param {string} wrapper_class - Class for the wrapper element
+{%- enddoc -%}
+
+<details class='{{ wrapper_class }} group/search inline-flex' data-search>
+  <summary class='flex items-center gap-1 group-open/search:absolute group-open/search:right-pagegutter group-open/search:z-40 group-open/search:top-1/2 group-open/search:-translate-y-1/2'>
+    <span class='group-open/search:hidden pointer-events-none inline-flex'>
+      {%- render 'icon' with 'icon-search', size: 24 -%}
+    </span>
+
+    <span class='hidden group-open/search:inline-flex pointer-events-none'>
+      {%- render 'icon' with 'icon-close', size: 24 -%}
+    </span>
+
+    <span class='sr-only'>{{ 'general.search.search' | t }}</span>
+  </summary>
+
+  <dialog class='hidden group-open/search:flex items-center justify-center absolute w-full left-0 top-0 right-0 bottom-0 bg-background pl-pagegutter pr-2xl md:pr-pagegutter z-30 h-full'>
+    {% render 'search-form', input_id: 'header-search' %}
+  </dialog>
+</details>

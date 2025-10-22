@@ -1,0 +1,13 @@
+{%- doc -%}
+  Displays a mega menu with a list of links.
+
+  @param {string} children - The HTML content for the menu items.
+  @param {string} [shopify_attributes] - Shopify attributes to add to the mega menu container.
+  @param {string} [color_scheme_class] - Color scheme class.
+{%- enddoc -%}
+
+<mega-menu class='{{ color_scheme_class }}' {{ shopify_attributes }}>
+  <ul class='flex flex-wrap items-center gap-x-sm' role='list'>
+    {{ children }}
+  </ul>
+</mega-menu>

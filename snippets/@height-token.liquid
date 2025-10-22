@@ -1,0 +1,86 @@
+{% doc %}
+  Returns a Tailwind height token class based on the provided numeric `value` and optional `media` argument.
+
+  @param {number} value - The numeric value to convert to a height token.
+  @param {string} [media] - Optional media prefix (e.g. 'md', 'lg').
+
+  @example
+  {% render '@height-token', value: 4 %}           => h-md
+  {% render '@height-token', value: 4, media: 'md' %} => md:h-md
+{% enddoc %}
+{%- liquid
+  case value
+    when 0
+      if media == 'md'
+        echo 'md:h-0'
+      elsif media == 'lg'
+        echo 'lg:h-0'
+      else
+        echo 'h-0'
+      endif
+    when 1
+      if media == 'md'
+        echo 'md:h-2xs'
+      elsif media == 'lg'
+        echo 'lg:h-2xs'
+      else
+        echo 'h-2xs'
+      endif
+    when 2
+      if media == 'md'
+        echo 'md:h-xs'
+      elsif media == 'lg'
+        echo 'lg:h-xs'
+      else
+        echo 'h-xs'
+      endif
+    when 3
+      if media == 'md'
+        echo 'md:h-sm'
+      elsif media == 'lg'
+        echo 'lg:h-sm'
+      else
+        echo 'h-sm'
+      endif
+    when 4
+      if media == 'md'
+        echo 'md:h-md'
+      elsif media == 'lg'
+        echo 'lg:h-md'
+      else
+        echo 'h-md'
+      endif
+    when 5
+      if media == 'md'
+        echo 'md:h-lg'
+      elsif media == 'lg'
+        echo 'lg:h-lg'
+      else
+        echo 'h-lg'
+      endif
+    when 6
+      if media == 'md'
+        echo 'md:h-xl'
+      elsif media == 'lg'
+        echo 'lg:h-xl'
+      else
+        echo 'h-xl'
+      endif
+    when 7
+      if media == 'md'
+        echo 'md:h-2xl'
+      elsif media == 'lg'
+        echo 'lg:h-2xl'
+      else
+        echo 'h-2xl'
+      endif
+    when 8
+      if media == 'md'
+        echo 'md:h-3xl'
+      elsif media == 'lg'
+        echo 'lg:h-3xl'
+      else
+        echo 'h-3xl'
+      endif
+  endcase
+-%}

@@ -1,0 +1,305 @@
+name: Sync (Anthropic)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * MON' # Every Monday at 4 AM UTC
+
+jobs:
+  core-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Target Repo
+        uses: actions/checkout@v5
+
+      - name: Checkout Foundation Base Repo
+        uses: actions/checkout@v5
+        with:
+          repository: meetdomaine/project-syrah
+          token: ${{ secrets.FOUNDATION_SYNC }}
+          path: core_base
+
+      - name: Validate Required Secrets
+        run: |
+          missing_secrets=()
+
+          # Check if FOUNDATION_SYNC secret exists (we know it worked if we got here, but let's be explicit)
+          if [ -z "${{ secrets.FOUNDATION_SYNC }}" ]; then
+            missing_secrets+=("FOUNDATION_SYNC")
+          fi
+
+          # Check if ANTHROPIC_API_KEY secret exists
+          if [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            missing_secrets+=("ANTHROPIC_API_KEY")
+          fi
+
+          if [ ${#missing_secrets[@]} -gt 0 ]; then
+            echo "❌ Missing required secrets:"
+            printf '%s\n' "${missing_secrets[@]}"
+            echo "Please configure these secrets in your repository settings."
+            exit 1
+          fi
+
+          echo "✅ All required secrets are configured"
+
+      - name: Sync Foundation Base Files (Additive Only)
+        run: |
+          mkdir -p updates
+          > updates/new_files.txt
+          > updates/modified_files.txt
+
+          # Function to sync files from source pattern to target
+          sync_files() {
+            local src_pattern="$1"
+            local target_prefix="$2"
+            local file_prefix="$3"
+            
+            find core_base/$src_pattern -type f 2>/dev/null | while read base_file; do
+              rel="${base_file#core_base/$target_prefix}"
+              tgt="$target_prefix$rel"
+              rel_with_prefix="$file_prefix$rel"
+
+              # Ensure target directory exists
+              mkdir -p "$(dirname "$tgt")"
+
+              if [ ! -f "$tgt" ]; then
+                cp "$base_file" "$tgt"
+                echo "$rel_with_prefix" >> updates/new_files.txt
+              elif ! cmp -s "$base_file" "$tgt"; then
+                cp "$base_file" "$tgt"
+                echo "$rel_with_prefix" >> updates/modified_files.txt
+              fi
+            done
+          }
+
+          # Sync core TypeScript/JavaScript files
+          sync_files "src/entry/core" "src/entry/core/" "src/entry/core/"
+
+          # Sync core blocks
+          sync_files "blocks/core-*.liquid" "blocks/" "blocks/"
+
+          # Sync core sections  
+          sync_files "sections/core-*.liquid" "sections/" "sections/"
+
+          # Sync core snippets (@ prefixed)
+          sync_files "snippets/@*.liquid" "snippets/" "snippets/"
+
+          # Sync docs directory
+          sync_files "docs" "docs/" "docs/"
+
+      - name: Generate Changes Diff
+        id: diff
+        run: |
+          git fetch origin main
+          git diff origin/main -- src/entry/core/ blocks/core-*.liquid sections/core-*.liquid snippets/@*.liquid docs/ > updates/core.diff
+          encoded=$(base64 updates/core.diff | tr -d '\n')
+          echo "diff=$encoded" >> $GITHUB_OUTPUT
+
+      # MODEL SELECTION RATIONALE
+      #
+      # For a “summarize this diff in a few sentences” task where inputs are modest
+      # and outputs are short, we choose claude-3-5-sonnet-20241022 for accuracy and cost.
+
+      - name: Summarize Changes with Anthropic (claude-3-5-sonnet)
+        id: ai_summary
+        if: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          echo "${{ steps.diff.outputs.diff }}" | base64 --decode > updates/core.diff
+          USER_MSG="You are an expert in TypeScript, Shopify Liquid templates, and technical documentation."
+
+          # 1) If there is a non-empty diff, ask for a 2–3 sentence overview
+          if [ -s updates/core.diff ]; then
+            DIFF_CONTENT=$(sed 's/\\/\\\\/g; s/"/\\"/g; s/$/\\n/' updates/core.diff | tr -d '\n')
+            USER_MSG="$USER_MSG\n\n• Summarize this git diff in 2–3 sentences:\n\n${DIFF_CONTENT}"
+          fi
+
+          # 2) If there are new files, also describe each file’s purpose
+          if [ -s updates/new_files.txt ]; then
+            FILES_DESC="\n\n• Describe these new files in 1–2 sentences each:"
+            for f in $(cat updates/new_files.txt); do
+              CONTENT=$(sed 's/\\/\\\\/g; s/"/\\"/g; s/$/\\n/' "$f" | tr -d '\n')
+              FILES_DESC="$FILES_DESC\n\n=== File: $f ===\n${CONTENT}"
+            done
+            USER_MSG="$USER_MSG$FILES_DESC"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg model "claude-3-5-sonnet-20241022" \
+            --argjson max_tokens 250 \
+            --argjson temperature 0.2 \
+            --arg user_msg "$USER_MSG" \
+            '{
+              model: $model,
+              messages: [
+                { role: "system", content: "You are an AI assistant that explains code changes clearly." },
+                { role: "user", content: $user_msg }
+              ],
+              max_tokens_to_sample: $max_tokens,
+              temperature: $temperature
+            }')
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Content-Type: application/json" \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            --data-raw "$PAYLOAD" \
+            https://api.anthropic.com/v1/chat/completions)
+          HTTP_BODY=$(echo "$RESPONSE" | sed '$d')
+          HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "Anthropic API error (status $HTTP_STATUS):"
+            echo "$HTTP_BODY"
+            exit 1
+          fi
+          SUMMARY=$(echo "$HTTP_BODY" | jq -r '.choices[0].message.content')
+          echo "summary<<EOF" >> $GITHUB_OUTPUT
+          echo "$SUMMARY" >> $GITHUB_OUTPUT
+          echo "EOF"      >> $GITHUB_OUTPUT
+
+      - name: Summarize file-by-file changes
+        id: file_summaries
+        if: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # start with an empty file (no leading blank)
+          > updates/file_summaries.md
+
+          for file in $(cat updates/new_files.txt updates/modified_files.txt); do
+            if grep -Fxq "$file" updates/new_files.txt; then
+              CONTENT=$(sed 's/\\/\\\\/g; s/"/\\"/g; s/$/\\n/' "$file" | tr -d '\n')
+              MSG="You are an expert in TypeScript, Shopify Liquid templates, and technical documentation. Describe the purpose of the new file $file in one highly technical sentence based on its content:\n\n${CONTENT}"
+            else
+              git diff origin/main -- "$file" > updates/tmp.diff
+              CONTENT=$(sed 's/\\/\\\\/g; s/"/\\"/g; s/$/\\n/' updates/tmp.diff | tr -d '\n')
+              MSG="You are a code review assistant. Provide a single, highly technical sentence summarizing the core change in $file based on this diff:\n\n${CONTENT}"
+            fi
+
+            PAYLOAD=$(jq -n \
+              --arg model "claude-3-5-sonnet-20241022" \
+              --arg system "You are a code review assistant. Provide a single, highly technical sentence summarizing the key functional change." \
+              --arg user "$MSG" \
+              --argjson max_tokens 100 \
+              --argjson temperature 0.2 \
+              '{
+                model: $model,
+                messages: [
+                  { role: "system", content: $system },
+                  { role: "user", content: $user }
+                ],
+                max_tokens_to_sample: $max_tokens,
+                temperature: $temperature
+              }')
+            RESPONSE=$(curl -s -w "\n%{http_code}" \
+              -H "Content-Type: application/json" \
+              -H "x-api-key: $ANTHROPIC_API_KEY" \
+              -H "anthropic-version: 2023-06-01" \
+              --data-raw "$PAYLOAD" \
+              https://api.anthropic.com/v1/chat/completions)
+            HTTP_BODY=$(echo "$RESPONSE" | sed '$d')
+            SUMMARY=$(echo "$HTTP_BODY" | jq -r '.choices[0].message.content')
+            echo "| \`$file\` | ${SUMMARY//|/\\|} |" >> updates/file_summaries.md
+          done
+
+      - name: Create Fallback Summaries
+        id: fallback_summaries
+        if: ${{ secrets.ANTHROPIC_API_KEY == '' }}
+        run: |
+          echo "AI summarization not available (ANTHROPIC_API_KEY not configured)" > fallback_summary.txt
+
+          # Create basic file summaries without AI
+          > updates/file_summaries.md
+          for file in $(cat updates/new_files.txt updates/modified_files.txt); do
+            if grep -Fxq "$file" updates/new_files.txt; then
+              echo "| \`$file\` | New core file added |" >> updates/file_summaries.md
+            else
+              echo "| \`$file\` | Core file updated |" >> updates/file_summaries.md
+            fi
+          done
+
+          echo "summary<<EOF" >> $GITHUB_OUTPUT
+          echo "Core files have been synchronized from the base repository. Manual review recommended." >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Prepare PR Content
+        id: changes
+        env:
+          AI_SUMMARY: ${{ steps.ai_summary.outputs.summary || steps.fallback_summaries.outputs.summary }}
+        run: |
+          if [ ! -s updates/new_files.txt ] && [ ! -s updates/modified_files.txt ]; then
+            echo "No changes detected. Exiting."
+            exit 0
+          fi
+
+          commit_msg="Foundation Sync:"
+          if [ -s updates/new_files.txt ]; then
+            f=$(head -n3 updates/new_files.txt | tr '\n' ',' | sed 's/,$/.../')
+            commit_msg="$commit_msg ✨ $f"
+          fi
+          if [ -s updates/modified_files.txt ]; then
+            f=$(head -n3 updates/modified_files.txt | tr '\n' ',' | sed 's/,$/.../')
+            commit_msg="$commit_msg ✏️ $f"
+          fi
+
+          pr_title="Foundation Sync:"
+          if [ -s updates/new_files.txt ]; then
+            f=$(head -n3 updates/new_files.txt | tr '\n' ',' | sed 's/,$/.../')
+            pr_title="$pr_title ✨ $f"
+          fi
+          if [ -s updates/modified_files.txt ]; then
+            f=$(head -n3 updates/modified_files.txt | tr '\n' ',' | sed 's/,$/.../')
+            pr_title="$pr_title ✏️ $f"
+          fi
+
+          {
+            echo "body<<EOF"
+            echo "## 📦 Foundation Base Files Updated"
+            echo
+            echo "### 🤖 Walkthrough"
+            echo
+            echo "$AI_SUMMARY"
+            echo
+            echo "| File(s) | Change Summary |"
+            echo "|---|---|"
+            cat updates/file_summaries.md
+            echo
+            if [ -s updates/new_files.txt ]; then
+              echo "### ✨ New files"
+              sed 's/^/`/;s/$/`/' updates/new_files.txt
+              echo
+            fi
+            if [ -s updates/modified_files.txt ]; then
+              echo "### ✏️ Modified files"
+              sed 's/^/`/;s/$/`/' updates/modified_files.txt
+              echo
+            fi
+            echo '---'
+            echo
+            echo '✅ Please **review carefully** before merging. This PR is automatically generated as part of our Foundation maintenance workflow.'
+            echo
+            echo 'If you have any questions about a specific update, feel free to tag @domaine-jay.'
+            echo "EOF"
+            echo "commit_message<<EOF"
+            echo "$commit_msg"
+            echo "EOF"
+            echo "title<<EOF"
+            echo "$pr_title"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: ${{ steps.changes.outputs.commit_message }}
+          title: ${{ steps.changes.outputs.title }}
+          body: ${{ steps.changes.outputs.body }}
+          branch: foundation-auto-update
+          add-paths: |
+            src/entry/core/**
+            blocks/core-*.liquid
+            sections/core-*.liquid
+            snippets/@*.liquid
+            docs/**

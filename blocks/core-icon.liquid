@@ -1,0 +1,95 @@
+{%- liquid
+  assign mod_settings = block.settings
+  assign image = mod_settings.image
+  assign link = mod_settings.link
+  assign width = mod_settings.width | default: 50
+  assign sizes = width | append: 'px'
+  assign section_index = section.index0
+  assign loading = 'eager'
+  assign preload = true
+
+  if section_index > 1
+    assign loading = 'lazy'
+    assign preload = false
+  endif
+  assign wrapper_classes = 'block overflow-hidden relative aspect-square'
+-%}
+{%- capture style_attribute -%}
+  width: {{ width }}px;
+{%- endcapture -%}
+{%- if link != blank -%}
+  <a
+    href='{{ link }}'
+    {%- if mod_settings.open_in_new_tab -%}
+      target='_blank'
+      rel='noopener noreferrer'
+    {%- endif -%}
+    class='{{ wrapper_classes }}'
+    style='{{ style_attribute }}'
+    {{ block.shopify_attributes }}
+  >
+{% else %}
+  <div class='{{ wrapper_classes }}' style='{{ style_attribute }}' {{ block.shopify_attributes }}>
+{%- endif -%}
+
+{%- capture image_widths -%}
+  {{ width }},{{ width | times: 1.5 }},{{ width | times: 2 }},{{ width | times: 2.5 }},{{ width | times: 3 }},{{ width | times: 3.5 }}
+{%- endcapture -%}
+{%- if image != blank -%}
+  {%- render 'image',
+    width: image.width,
+    image: image,
+    alt: image.alt,
+    sizes: sizes,
+    widths: image_widths,
+    preload: preload,
+    loading: loading,
+    object_fit: 'contain',
+    container: false,
+    class: 'h-full w-full absolute inset-0'
+  -%}
+{% else %}
+  {{ 'image' | placeholder_svg_tag: 'h-full w-full absolute inset-0' }}
+{% endif %}
+{%- if link != blank -%}
+  </a>
+{% else %}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:names.core-icon",
+  "tag": null,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:content.image"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:content.link"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_in_new_tab",
+      "label": "t:content.open_in_new_tab",
+      "visible_if": "{{ block.settings.link != blank }}"
+    },
+    {
+      "type": "number",
+      "id": "width",
+      "label": "t:settings.width",
+      "default": 50
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.core-icon",
+      "category": "t:preset_categories.core-basic"
+    }
+  ]
+}
+{% endschema %}

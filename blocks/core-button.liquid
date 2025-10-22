@@ -1,0 +1,117 @@
+{% liquid
+  assign mod_settings = block.settings
+  assign wrapper_element = 'button'
+
+  if mod_settings != blank
+    assign wrapper_element = 'a'
+  endif
+
+  assign btn_variant = mod_settings.style
+  if mod_settings.color_mode == 'inverse'
+    assign btn_variant = mod_settings.style_inverse
+  endif
+%}
+
+{%- if mod_settings.text != blank -%}
+  <{{ wrapper_element }}
+    {%- if mod_settings.link != blank -%}
+      href='{{ mod_settings.link | escape }}'
+      {%- if mod_settings.open_in_new_tab -%}
+        target='_blank'
+        rel='noopener noreferrer'
+      {%- endif -%}
+    {%- endif -%}
+    class='btn {% if mod_settings.button_width == "custom" %}!min-w-(--custom-button-width){% endif %} {% if mod_settings.button_width == "auto" %}!w-auto{% endif %}'
+    style='{% if mod_settings.button_width == "custom" %}--custom-button-width: {{ mod_settings.min_width }}%;{% endif %}'
+    variant='{{ btn_variant }}'
+    {{ block.shopify_attributes }}
+  >
+    {{ mod_settings.text }}
+  </{{ wrapper_element }}>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:names.core-button",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "t:content.text"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:content.link"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_in_new_tab",
+      "label": "t:content.open_in_new_tab",
+      "visible_if": "{{ block.settings.link != blank }}"
+    },
+    {
+      "type": "select",
+      "id": "style",
+      "label": "t:content.button_style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "t:options.primary"
+        },
+        {
+          "value": "secondary",
+          "label": "t:options.secondary"
+        },
+        {
+          "value": "tertiary",
+          "label": "t:options.tertiary"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "select",
+      "id": "button_width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "fit",
+          "label": "t:options.fit"
+        },
+        {
+          "value": "auto",
+          "label": "t:options.auto"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "fit"
+    },
+    {
+      "type": "range",
+      "id": "min_width",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "t:settings.width",
+      "default": 25,
+      "visible_if": "{{ block.settings.button_width == 'custom' }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.core-button",
+      "category": "t:preset_categories.core-basic",
+      "settings": {
+        "text": "Button",
+        "link": "shopify://collections/all"
+      }
+    }
+  ]
+}
+{% endschema %}

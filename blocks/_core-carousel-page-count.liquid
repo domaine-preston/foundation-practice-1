@@ -1,0 +1,76 @@
+{%- doc -%}
+  Displays carousel page counter + prev/next arrows
+
+  @param {boolean} [loop]
+{%- enddoc -%}
+
+{% if block != blank %}
+  {%- capture vertical_position_classes -%}
+  {%- if block.settings.position == 'overlay' -%} absolute z-[2] bottom-sm {%- else -%} relative {%- endif -%}
+{% endcapture %}
+
+  {%- capture horizonal_alignment_classes -%}
+  {%- if block.settings.alignment == 'left' -%} left-sm justify-start {%- endif -%}
+  {%- if block.settings.alignment == 'center' -%} left-1/2 -translate-x-1/2 justify-center {%- endif -%}
+  {%- if block.settings.alignment == 'right' -%} right-sm justify-end {%- endif -%}
+{%- endcapture -%}
+
+  <div
+    position-{{ block.settings.position }}
+    class='flex items-center gap-xs {{ vertical_position_classes }} {{ horizonal_alignment_classes }}'
+  >
+    <button
+      class='core-carousel-button core-carousel-button-prev relative right-auto left-auto translate-0 text-(--foreground)'
+      data-carousel-prev
+      {% if loop == false %}
+        disabled
+      {% endif %}
+    >
+      {% render 'icon', icon: 'icon-arrow', size: 16, class: 'rotate-180' %}
+    </button>
+    <div class='' aria-live='polite' data-page-counter>1 / 1</div>
+    <button
+      class='core-carousel-button core-carousel-button-next relative right-auto left-auto translate-0 text-(--foreground)'
+      data-carousel-next
+    >
+      {% render 'icon', icon: 'icon-arrow', size: 16 %}
+    </button>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Carousel Page Count",
+  "tag": null,
+  "settings": [
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Position",
+      "options": [
+        { "value": "above", "label": "Above" },
+        { "value": "below", "label": "Below" },
+        { "value": "overlay", "label": "overlay" }
+      ],
+      "default": "below"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carousel Page Count",
+      "category": "Carousel"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,18 @@
+@import 'tailwindcss';
+@config '../../tailwind.config.ts';
+
+@source '../src/**/*.{js,ts,jsx,tsx}';
+/* Include all files except those with "styleguide" in the filename */
+@source '../../{layout,sections,snippets,templates,blocks}/**/*styleguide*.{liquid,css,js,ts}';
+
+@import './@theme.css';
+
+@layer components {
+  .spacing-token {
+    @apply border-border-01 bg-background-secondary shrink-0 grow-0 border-2 border-dashed;
+  }
+
+  .color-token {
+    @apply p-sm basis-4/12;
+  }
+}

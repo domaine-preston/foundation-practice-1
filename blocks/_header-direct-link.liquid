@@ -1,0 +1,56 @@
+{%- assign mod_settings = block.settings -%}
+
+<!-- @variant/split -->
+{%- comment -%}
+  Desktop variant
+{%- endcomment -%}
+{%- render 'header-direct-link',
+  link: mod_settings.link,
+  title: mod_settings.title,
+  class: 'p',
+  open_in_new_tab: mod_settings.open_in_new_tab,
+  shopify_attributes: block.shopify_attributes
+-%}
+
+<!-- @variant/split -->
+{%- comment -%}
+  Mobile variant
+{%- endcomment -%}
+{%- liquid
+  assign class = 'h6'
+  if mod_settings.link == request.path
+    assign class = class | append: ' underline underline-offset-4'
+  endif
+  render 'header-direct-link', link: mod_settings.link, title: mod_settings.title, class: class, open_in_new_tab: mod_settings.open_in_new_tab, shopify_attributes: block.shopify_attributes, title_wrapper: false
+-%}
+
+{% schema %}
+{
+  "name": "t:blocks.header_direct_link.name",
+  "presets": [
+    {
+      "name": "t:blocks.header_direct_link.name",
+      "category": "Header"
+    }
+  ],
+  "tag": null,
+  "settings": [
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:blocks.header_direct_link.settings.link.label"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:blocks.header_direct_link.settings.title.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_in_new_tab",
+      "label": "t:blocks.header_direct_link.settings.open_in_new_tab.label",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

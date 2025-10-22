@@ -1,0 +1,85 @@
+{%- capture spacing_token -%}
+  {%- render '@spacing-padding', spacing_settings: block.settings, default_token: 'p-sm' -%}
+{%- endcapture -%}
+{%- assign links = block.settings.menu.links -%}
+{%- if links -%}
+  <ul class='{{ spacing_token }} grid grid-cols-1 gap-xs' {{ block.shopify_attributes }}>
+    {%- for link in links -%}
+      <li>
+        <a class='h6 text-[inherit]' href='{{ link.url }}'>{{ link.title }}</a>
+      </li>
+    {%- endfor -%}
+  </ul>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:names.core-menu",
+  "tag": null,
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "default": "main-menu",
+      "label": "t:sections.footer.blocks.link_list.settings.menu.label",
+      "info": "t:sections.footer.blocks.link_list.settings.menu.info"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_custom_spacing",
+      "label": "t:spacing.use_custom_spacing.label",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_top",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline_end",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_inline_end",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_bottom",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline_start",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_inline_start",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.core-menu",
+      "category": "t:preset_categories.core-basic"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,264 @@
+{% comment %}
+  This section can be used anywhere. On a PDP, it will use the current product as the base for recommendations.
+  If the section is used on a non-PDP page, the default product will be used to generate recommendations.
+  Alternatively, the admin can set a `default_product_list` to display a list of products instead of recommendations.
+{% endcomment %}
+
+{% assign section_settings = section.settings %}
+
+{% assign product_to_use = product %}
+{% if template.name != 'product' %}
+  {% assign product_to_use = section_settings.default_product %}
+{% endif %}
+
+{%- capture color_scheme -%}
+  {%- render '@color-scheme', color_scheme: section.settings.color_scheme -%}
+{%- endcapture -%}
+
+<div class='{{ color_scheme }} flex flex-col items-start gap-xs 2xl:container px-pagemargin'>
+  {%- content_for 'block', type: 'core-group', id: 'group' -%}
+</div>
+
+{%- if recommendations.performed? -%}
+  {{ recommendations.products_count | json }}
+  {{ recommendations.intent | json }}
+  {{ recommendations | json }}
+  {%- if recommendations.products_count > 0 -%}
+    {%- capture product_cards_html -%}
+      {%- for product in recommendations.products -%}
+        {%- # theme-check-disable CaptureOnContentForBlock -%}
+        {%- content_for 'block', type: 'product-card', id: 'product-card', closest.product: product -%}
+        {% # theme-check-enable CaptureOnContentForBlock %}
+        {%- unless forloop.last -%}<!-- @list/split -->{%- endunless -%}
+      {%- endfor -%}
+    {%- endcapture -%}
+    {%- assign slides = product_cards_html | split: '<!-- @list/split -->' -%}
+    <div
+      section-id='{{ section.id }}'
+      class='{{ color_scheme }} grid grid-cols-1 gap-y-sm 2xl:container px-pagemargin py-sm'
+      data-url='{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product_to_use.id }}&limit=4&intent=related'
+    >
+      {%- render 'product-cards-carousel',
+        slides: slides,
+        section_settings: section_settings,
+        section_id: section.id
+      -%}
+    </div>
+  {%- elsif section_settings.default_product_list != blank -%}
+    {%- capture product_cards_html -%}
+      {%- for product in section_settings.default_product_list-%}
+        {%- # theme-check-disable CaptureOnContentForBlock, UniqueStaticBlockId -%}
+        {%- content_for 'block', type: 'product-card', id: 'product-card', closest.product: product -%}
+        {% # theme-check-enable CaptureOnContentForBlock, UniqueStaticBlockId %}
+        {%- unless forloop.last -%}<!-- @list/split -->{%- endunless -%}
+      {%- endfor -%}
+    {%- endcapture -%}
+    {%- assign slides = product_cards_html | split: '<!-- @list/split -->' -%}
+    <div
+      section-id='{{ section.id }}'
+      class='{{ color_scheme }} grid grid-cols-1 gap-y-sm 2xl:container px-pagemargin py-sm'
+    >
+      {%- render 'product-cards-carousel',
+        slides: slides,
+        section_settings: section_settings,
+        section_id: section.id
+      -%}
+    </div>
+  {%- endif -%}
+{%- elsif product_to_use != blank -%}
+  {%- render '@needs-script', entries: 'core-inject-section' -%}
+  <section-injection
+    id='{{ section.id }}'
+    section-name='{{ section.id }}'
+    base-url='{{ routes.product_recommendations_url }}'
+    params='?product_id={{ product_to_use.id }}&limit={{ section_settings.limit }}&intent={{ section_settings.intent }}'
+  ></section-injection>
+{%- elsif section_settings.default_product_list != blank -%}
+  {%- capture product_cards_html -%}
+    {%- for product in section_settings.default_product_list -%}
+      {%- # theme-check-disable CaptureOnContentForBlock, UniqueStaticBlockId -%}
+      {%- content_for 'block', type: 'product-card', id: 'product-card', closest.product: product -%}
+      {% # theme-check-enable CaptureOnContentForBlock, UniqueStaticBlockId %}
+      {%- unless forloop.last -%}<!-- @list/split -->{%- endunless -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+  {%- assign slides = product_cards_html | split: '<!-- @list/split -->' -%}
+  <div
+    section-id='{{ section.id }}'
+    class='{{ color_scheme }} grid grid-cols-1 gap-y-sm 2xl:container px-pagemargin py-sm'
+  >
+    {%- render 'product-cards-carousel',
+      slides: slides,
+      limit: section_settings.default_product_list.count,
+      section_settings: section_settings,
+      section_id: section.id
+    -%}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:sections.product-recommendations.name",
+  "settings": [
+    {
+      "type": "number",
+      "id": "limit",
+      "label": "t:sections.product-recommendations.settings.limit",
+      "default": 8
+    },
+    {
+      "type": "select",
+      "id": "intent",
+      "label": "t:sections.product-recommendations.settings.intent",
+      "options": [
+        {
+          "value": "related",
+          "label": "t:sections.product-recommendations.settings.intent__related"
+        },
+        {
+          "value": "complementary",
+          "label": "t:sections.product-recommendations.settings.intent__complementary"
+        }
+      ],
+      "default": "related"
+    },
+    {
+      "type": "product",
+      "id": "default_product",
+      "label": "t:sections.product-recommendations.settings.default_product.label",
+      "info": "t:sections.product-recommendations.settings.default_product.info"
+    },
+    {
+      "type": "product_list",
+      "id": "default_product_list",
+      "label": "t:sections.product-recommendations.settings.default_product_list.label",
+      "info": "t:sections.product-recommendations.settings.default_product_list.info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.product-recommendations.settings.carousel_settings.title"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "t:sections.product-recommendations.settings.carousel_settings.show_arrows.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "t:sections.product-recommendations.settings.carousel_settings.show_dots.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_progress_bar",
+      "label": "t:sections.product-recommendations.settings.carousel_settings.show_progress_bar.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_page_counter",
+      "label": "t:sections.product-recommendations.settings.carousel_settings.show_page_counter.label",
+      "info": "t:sections.product-recommendations.settings.carousel_settings.show_page_counter.info",
+      "default": false
+    },
+    {
+      "type": "number",
+      "id": "items_to_show",
+      "label": "t:sections.product-recommendations.settings.carousel_settings.items_to_show.label",
+      "default": 4
+    },
+    {
+      "type": "number",
+      "id": "items_to_show_mobile",
+      "label": "t:sections.product-recommendations.settings.carousel_settings.items_to_show_mobile.label",
+      "default": 1
+    },
+    {
+      "type": "number",
+      "id": "items_to_scroll",
+      "label": "t:sections.product-recommendations.settings.carousel_settings.items_to_scroll.label",
+      "default": 1
+    },
+    {
+      "type": "number",
+      "id": "gap",
+      "label": "t:sections.product-recommendations.settings.carousel_settings.gap.label",
+      "info": "t:sections.product-recommendations.settings.carousel_settings.gap.info",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "carousel_mobile_only",
+      "label": "t:sections.product-recommendations.settings.carousel_settings.carousel_mobile_only.label",
+      "info": "t:sections.product-recommendations.settings.carousel_settings.carousel_mobile_only.info",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "carousel_desktop_only",
+      "label": "t:sections.product-recommendations.settings.carousel_settings.carousel_desktop_only.label",
+      "info": "t:sections.product-recommendations.settings.carousel_settings.carousel_desktop_only.info",
+      "default": false
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.product-recommendations.name",
+      "blocks": {
+        "group": {
+          "static": true,
+          "type": "core-group",
+          "blocks": {
+            "title": {
+              "type": "core-heading",
+              "settings": {
+                "text": "<p>You may also like</p>",
+                "heading_style": "h2",
+                "use_custom_spacing": true
+              }
+            },
+            "desc": {
+              "type": "core-text",
+              "settings": {
+                "text": "<p>Our mission is to enrich everyday life through a diverse range of high-quality home goods, electronics, and apparel. </p>",
+                "use_custom_spacing": true
+              }
+            },
+            "button": {
+              "type": "core-button",
+              "settings": {
+                "text": "Shop collection",
+                "link": "/",
+                "style": "tertiary"
+              }
+            }
+          },
+          "block_order": ["title", "desc", "button"]
+        },
+        "product-card": {
+          "type": "product-card",
+          "static": true,
+          "settings": {
+            "product": "{{ closest.product }}",
+            "media_aspect_ratio": "square"
+          },
+          "blocks": {}
+        }
+      },
+      "settings": {
+        "gap": 10,
+        "show_dots": false,
+        "show_progress_bar": false
+      }
+    }
+  ]
+}
+{% endschema %}

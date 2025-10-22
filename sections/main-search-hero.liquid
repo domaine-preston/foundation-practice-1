@@ -1,0 +1,64 @@
+{% comment %}
+  Search page header displaying search terms and results count.
+  Shows search feedback and handles no results scenarios.
+
+  Features:
+  - Search term display with results count
+  - Dynamic results counting (products only)
+  - No results message and suggestions
+  - Search performed state detection
+  - Responsive typography and spacing
+
+  Content states:
+  - Search performed with results: Shows count and terms
+  - Search performed with no results: Shows no results message
+  - No search performed: Shows default search state
+
+  Layout:
+  - Search heading with italic styling
+  - Large result count with search terms
+  - Conditional messaging based on results
+  - Responsive margins and spacing
+
+  Dependencies:
+  - Search liquid object with results and terms
+  - Localization for all text content
+  - Responsive design system classes
+
+  Usage:
+  - Always used at top of search results page
+  - Provides context for search state
+  - Guides user experience with clear messaging
+{% endcomment %}
+
+{% liquid
+  assign products_results = search.results | where: 'object_type', 'product'
+%}
+
+<div class='mx-sm my-lg lg:m-lg 2xl:mx-0'>
+  <h1 class='h5 italic mb-2xs'>
+    {{ 'general.search.search' | t }}
+  </h1>
+  <h2 class='h1' sub-section-id='MainSearchResultsCount'>
+    {{ 'templates.search.results_with_count' | t: terms: search.terms, count: products_results.size }}
+  </h2>
+  {%- if search.performed and products_results.size == 0 -%}
+    <p class='text-body mb-sm'>
+      {{ 'templates.search.no_results' | t: terms: search.terms }}
+    </p>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.main-search-hero.name",
+  "enabled_on": {
+    "templates": ["search"]
+  },
+  "presets": [
+    {
+      "name": "t:sections.main-search-hero.name"
+    }
+  ]
+}
+{% endschema %}

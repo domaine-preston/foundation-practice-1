@@ -1,0 +1,163 @@
+{% comment %}
+  Search results page displaying products in a responsive grid with filtering.
+  Shows filtered search results with faceted navigation and sorting options.
+
+  Features:
+  - Product search results display
+  - Faceted filtering (price, brand, category, etc.)
+  - Sorting options for search results
+  - Real-time filter updates without page refresh
+  - Responsive grid layout
+  - Search term highlighting and feedback
+  - No results handling with suggestions
+
+  Layout:
+  - Filters: Collapsible filter sidebar or top filters
+  - Grid: Responsive product grid (mobile to desktop)
+  - Results count and sorting controls
+  - Pagination for large result sets
+
+  Search handling:
+  - Filters search results by product object type
+  - Maintains active filter state
+  - Constructs filter parameter strings for URLs
+  - Integrates with Shopify search API
+
+  Dependencies:
+  - component-facets.js for filter functionality
+  - Search liquid object with results
+  - Product card snippets for result display
+  - Facets and pagination components
+
+  Schema settings control:
+  - Grid layout and spacing options
+  - Filter display and behavior
+  - Results per page settings
+  - Sort option availability
+{% endcomment %}
+
+{%- render '@needs-script', entries: 'component-facets.js' -%}
+
+{% liquid
+  assign filter_params = ''
+  assign active_filters_size = 0
+  assign product_results = search.results | where: 'object_type', 'product'
+
+  if product_results.size > 0
+    for filter in search.filters
+      if filter.active_values.size > 0
+        assign active_filters_size = active_filters_size | plus: filter.active_values.size
+
+        if filter_params != ''
+          assign filter_params = filter_params | append: '&'
+        endif
+
+        for value in filter.active_values
+          assign filter_params = filter_params | append: filter.param_name | append: '=' | append: value.value
+
+          unless forloop.last
+            assign filter_params = filter_params | append: '&'
+          endunless
+        endfor
+      endif
+    endfor
+  endif
+%}
+
+<div id='collection' data-section-id='{{- section.id -}}'>
+  <div section-id='{{- section.id -}}'>
+    {% if product_results.size > 0 %}
+      {%- paginate search.results by section.settings.products_per_page -%}
+        <div class='container pb-6'>
+          <aside
+            class='pb-6'
+            id='main-collection-filters'
+            data-id='{{ section.id }}'
+            {% comment %}
+              Remove 'sub-section-id' if you don't need to update the filters
+              with the product grid. Filters are updated onChange already.
+
+              Keep in mind any DOM tree changes here, like `active_filters_size`,
+              wouldn't be updated if you remove the `sub-section-id`.
+            {% endcomment %}
+            sub-section-id='main-collection-filters'
+          >
+            {% capture drawer_filters %}
+            {% render 'facets', results: search %}
+          {% endcapture %}
+
+            {% capture filters_button %}Filters ({{ active_filters_size }}){% endcapture %}
+
+            {% render 'modal-dialog-toggle', modal_id: 'filter-drawer-dialog', label: filters_button %}
+
+            {% liquid
+              assign title = 'Filters'
+              render 'modal-dialog', id: 'filter-drawer-dialog', anchor: 'left', content: drawer_filters, type: 'drawer', close_on_backdrop_click: true, title: title
+            %}
+          </aside>
+
+          <div sub-section-id='product-grid-container' id='product-grid-container'>
+            <ul
+              id='product-grid'
+              data-id='{{ section.id }}'
+              class='grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4 lg:gap-x-8'
+            >
+              {%- for product in product_results -%}
+                {%- liquid
+                  assign lazy_load = false
+                  if forloop.index > 4
+                    assign lazy_load = true
+                  endif
+                -%}
+
+                <li class='w-full flex'>
+                  {% content_for 'block',
+                    type: 'product-card',
+                    id: 'product-card',
+                    closest.product: product,
+                    lazy_load: lazy_load
+                  %}
+                </li>
+              {%- endfor -%}
+            </ul>
+
+            {%- if paginate.pages > 1 -%}
+              <div class='flex justify-center py-6 [&_span.current]:font-bold [&_span]:px-2'>
+                {{- paginate | default_pagination -}}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endpaginate -%}
+    {% else %}
+      {% comment %} consider showing product recommendations here {% endcomment %}
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.main-collection-product-grid.name",
+  "class": "section",
+  "enabled_on": {
+    "templates": ["search"]
+  },
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 8,
+      "max": 36,
+      "step": 4,
+      "default": 16,
+      "label": "t:sections.main-collection-product-grid.settings.products_per_page.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "shoppable_card",
+      "label": "t:sections.main-collection-product-grid.settings.shoppable_card.label",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

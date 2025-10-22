@@ -1,0 +1,141 @@
+{%- liquid
+  assign mod_settings = block.settings
+  assign media = mod_settings.media
+  assign media_mobile = mod_settings.media_mobile
+  assign video_url = mod_settings.video_url
+
+  if video_url != blank
+    assign media = video_url
+  endif
+
+  assign cover_image = mod_settings.cover_image
+  assign video_alt = mod_settings.video_alt
+  assign loop = mod_settings.loop
+  assign autoplay = mod_settings.autoplay
+  assign poster_loading = 'lazy'
+  assign muted = false
+  assign controls = true
+  assign aspect_ratio = mod_settings.aspect_ratio | default: 'aspect-video'
+  assign class = 'relative w-full ' | append: aspect_ratio
+
+  if autoplay
+    assign muted = true
+
+    if loop
+      assign controls = false
+    endif
+  endif
+
+  if video_url != blank
+    assign autoplay = false
+    assign loop = false
+    assign muted = false
+  endif
+
+  if section.index0 < 1
+    assign poster_loading = 'eager'
+  endif
+-%}
+
+{%- if media != blank -%}
+  {%- render 'deferred-media',
+    title: video_alt,
+    video: media,
+    video_mobile: media_mobile,
+    cover_image: cover_image,
+    loop: loop,
+    poster_loading: poster_loading,
+    muted: muted,
+    autoplay: autoplay,
+    controls: controls,
+    object_fit: 'object-cover',
+    class: class,
+    shopify_attributes: block.shopify_attributes
+  -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:names.core-video",
+  "tag": null,
+  "settings": [
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "label": "t:content.video_url",
+      "accept": ["youtube", "vimeo"],
+      "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc"
+    },
+    {
+      "type": "video",
+      "id": "media",
+      "label": "t:content.video",
+      "visible_if": "{{ block.settings.video_url == blank }}"
+    },
+    {
+      "type": "video",
+      "id": "media_mobile",
+      "label": "t:content.video_mobile",
+      "visible_if": "{{ block.settings.video_url == blank and block.settings.media != blank }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "loop",
+      "label": "t:content.loop",
+      "default": false,
+      "visible_if": "{{ block.settings.video_url == blank }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "t:content.autoplay",
+      "default": false,
+      "visible_if": "{{ block.settings.video_url == blank }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "cover_image",
+      "label": "t:content.cover_image"
+    },
+    {
+      "type": "text",
+      "id": "video_alt",
+      "label": "t:content.video_alt"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "t:content.aspect_ratio",
+      "options": [
+        {
+          "value": "",
+          "label": "t:options.aspect_auto"
+        },
+        {
+          "value": "aspect-[9/16]",
+          "label": "t:options.aspect_portrait"
+        },
+        {
+          "value": "aspect-video",
+          "label": "t:options.aspect_landscape"
+        },
+        {
+          "value": "aspect-square",
+          "label": "t:options.aspect_square"
+        }
+      ],
+      "default": "aspect-video"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.core-video",
+      "category": "t:preset_categories.core-basic"
+    }
+  ]
+}
+{% endschema %}

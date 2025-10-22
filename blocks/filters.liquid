@@ -1,0 +1,48 @@
+{%- doc -%}
+  Displays filters for the collection page
+
+  @param {number} active_filters_size
+  @param {string} [color_scheme]
+{%- enddoc -%}
+
+<aside
+  class='pb-sm'
+  id='main-collection-filters'
+  data-id='{{ section.id }}'
+  {% comment %}
+    Remove 'sub-section-id' if you don't need to update the filters
+    with the product grid. Filters are updated onChange already.
+
+    Keep in mind any DOM tree changes here, like `active_filters_size`,
+    wouldn't be updated if you remove the `sub-section-id`.
+  {% endcomment %}
+  sub-section-id='main-collection-filters'
+>
+  {% capture drawer_filters %}{% render 'facets', results: collection %}{% endcapture %}
+
+  {% capture filters_button %}Filters ({{ active_filters_size }}){% endcapture %}
+  {%- capture toggle_button -%}
+    <button type='button' class='btn' variant='tertiary'>
+      {{- filters_button -}}
+      {%- render 'icon' with 'icon-filters', size: 16 -%}
+    </button>
+  {%- endcapture -%}
+
+  {% render 'modal-dialog-toggle',
+    modal_id: 'filter-drawer-dialog',
+    label: filters_button,
+    toggle_element: toggle_button,
+    class: color_scheme
+  %}
+
+  {% liquid
+    assign title = 'Filters'
+    render 'modal-dialog', id: 'filter-drawer-dialog', anchor: 'left', content: drawer_filters, type: 'drawer', close_on_backdrop_click: true, title: title, class: '[&_[data-slot=header]]:h6', parent_class: color_scheme
+  %}
+</aside>
+
+{% schema %}
+{
+  "name": "t:names.filters"
+}
+{% endschema %}

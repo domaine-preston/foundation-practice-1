@@ -1,0 +1,60 @@
+{% doc %}
+  Render a picture tag with separate mobile and desktop images.
+
+  @param {object} [mobile_image] - Image object for mobile
+  @param {object} image - Image object for desktop
+  @param {string} [desktop_width] - The width of the desktop image (defaults to desktop image width)
+  @param {string} [desktop_height] - The height of the desktop image (defaults to desktop image height)
+  @param {string} [mobile_width] - The width of the mobile image (defaults to mobile image width)
+  @param {string} [mobile_height] - The height of the mobile image (defaults to mobile image height)
+  @param {string} [alt] - The alt text of the image
+  @param {string} [class] - The class of the image
+  @param {string} [id] - The id of the image
+  @param {string} [sizes] - The sizes attribute of the image
+  @param {string} [object_fit] - The object-fit of the image
+  @param {boolean} [preload] - The preload of the image
+  @param {string} [loading] - The loading of the image
+  @param {string} [container_class] - The container class of the image
+  @param {string} [widths] - The widths for srcset attribute (e.g. '200, 300, 400, 500')
+  @param {string} [fetchpriority] - The fetchpriority of the image (e.g. 'high', 'low', 'auto')
+
+  @example
+  {% render 'picture', mobile_image: section.settings.mobile_image, image: section.settings.image %}
+{% enddoc %}
+
+{%- assign mobile_image = mobile_image | default: image -%}
+{% assign desktop_width = desktop_width | default: image.width %}
+{% assign desktop_height = desktop_height | default: image.height %}
+{% assign mobile_width = mobile_width | default: mobile_image.width %}
+{% assign mobile_height = mobile_height | default: mobile_image.height %}
+
+<picture class='{{ container_class }}'>
+  <source
+    media='(max-width: 767px)'
+    srcset='
+      {{ mobile_image | image_url: width: 300 }} 300w,
+      {{ mobile_image | image_url: width: 450 }} 450w,
+      {{ mobile_image | image_url: width: 600 }} 600w,
+      {{ mobile_image | image_url: width: 750 }} 750w,
+      {{ mobile_image | image_url: width: 900 }} 900w,
+      {{ mobile_image | image_url: width: 1050 }} 1050w,
+    '
+    width='{{ mobile_width }}'
+    height='{{ mobile_height }}'
+  >
+  {%- assign sizes = sizes | default: '(min-width: 768px) 50vw, 100vw' -%}
+  {%- render 'image',
+    image: image,
+    width: desktop_width,
+    height: desktop_height,
+    widths: widths,
+    sizes: sizes,
+    object_fit: object_fit,
+    loading: loading,
+    preload: preload,
+    alt: alt,
+    class: class,
+    id: id,
+    fetchpriority: fetchpriority
+  -%}
+</picture>

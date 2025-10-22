@@ -1,0 +1,1170 @@
+---
+description: Writing CSS, whether inside .css files or in the `{% stylesheet %}…{% endstylesheet %}` or `{% style %}…{% endstyle %}` tags
+globs:
+alwaysApply: false
+---
+
+# CSS Standards
+
+## 🎯 Tailwind First Approach
+
+**Primary Rule: Use Tailwind CSS v4 utilities for all styling whenever possible.**
+
+### When to Use Tailwind
+
+- **Layout:** `grid`, `flex`, `block`, `inline`, etc.
+- **Spacing:** `p-{size}`, `m-{size}`, `gap-{size}`, etc.
+- **Typography:** `text-{size}`, `font-{weight}`, `leading-{height}`, etc.
+- **Colors:** `bg-{color}`, `text-{color}`, `border-{color}`, etc.
+- **States:** `hover:`, `focus:`, `active:`, `group-hover:`, etc.
+- **Responsive:** `md:`, `lg:`, `xl:`, `2xl:` prefixes
+- **Animations:** `transition-{property}`, `duration-{time}`, `ease-{curve}`, etc.
+
+### When Traditional CSS is Acceptable
+
+Use custom CSS **only** when:
+
+1. **Complex animations** that require keyframes
+2. **Vendor-specific styles** (e.g., `-webkit-appearance`)
+3. **Dynamic CSS variables** that change at runtime via Liquid
+4. **Third-party library overrides** where utilities don't apply cleanly
+5. **Complex pseudo-selectors** that Tailwind doesn't support
+6. **Browser-specific hacks** or progressive enhancement
+
+## Tailwind Usage Rules
+
+### Class Organization
+
+Keep Tailwind classes organized and readable:
+
+```html
+<!-- ✅ DO: Group related utilities -->
+<div class="
+  flex flex-col gap-y-sm
+  p-md rounded-sm
+  bg-background text-foreground
+  hover:bg-background-secondary
+  md:flex-row md:gap-x-md
+">
+  Content
+</div>
+
+<!-- ❌ DON'T: Mix unrelated utilities randomly -->
+<div class="flex bg-background p-md text-foreground gap-y-sm hover:bg-background-secondary rounded-sm flex-col md:flex-row md:gap-x-md">
+  Content
+</div>
+```
+
+### Responsive Design
+
+Always use mobile-first approach:
+
+```html
+<!-- ✅ DO: Mobile first, progressive enhancement -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+  <!-- Content -->
+</div>
+
+<!-- ❌ DON'T: Desktop first -->
+<div class="grid grid-cols-4 lg:grid-cols-2 md:grid-cols-1">
+  <!-- Content -->
+</div>
+```
+
+### Custom Utilities with @apply
+
+When you need reusable patterns, create utilities with `@apply`:
+
+```css
+/* ✅ DO: Create semantic utilities for repeated patterns */
+@utility btn {
+  @apply uppercase tracking-[0.05em] px-6 py-3 rounded-full transition-colors;
+}
+
+@utility card {
+  @apply bg-background border border-border-01 rounded-sm p-md shadow-sm;
+}
+
+/* ❌ DON'T: Use @apply for single-use patterns */
+@utility one-off-header {
+  @apply text-2xl font-bold text-red-500; /* Just use classes directly */
+}
+```
+
+### Color System Integration
+
+Use semantic color tokens from the design system:
+
+```html
+<!-- ✅ DO: Use semantic color classes -->
+<div class="bg-background text-foreground border-border-01">
+  <p class="text-foreground-secondary">Secondary text</p>
+  <button class="bg-accent-01 text-foreground-inverse">Action</button>
+</div>
+
+<!-- ❌ DON'T: Use arbitrary color values -->
+<div class="bg-[#ffffff] text-[#000000] border-[#e5e5e5]">
+  <p class="text-[#666666]">Secondary text</p>
+  <button class="bg-[#007bff] text-[#ffffff]">Action</button>
+</div>
+```
+
+### Dynamic Values with CSS Variables
+
+For runtime-dynamic values, combine Tailwind with CSS variables:
+
+```html
+<!-- ✅ DO: Use CSS variables for dynamic content -->
+<section
+  class="py-sm bg-background"
+  style="
+    --section-padding: {{ section.settings.padding }}px;
+    --bg-color: {{ section.settings.background_color }};
+  "
+>
+  <div class="p-(--section-padding) bg-[--bg-color]">
+    Content
+  </div>
+</section>
+```
+
+### Component Patterns
+
+Create consistent component patterns:
+
+```html
+<!-- Product Card Pattern -->
+<div class="group relative flex flex-col overflow-hidden bg-background border border-border-01 rounded-sm transition-shadow hover:shadow-md">
+  <div class="aspect-[3/4] bg-background-secondary overflow-hidden">
+    <img class="h-full w-full object-cover transition-transform group-hover:scale-105" />
+  </div>
+  <div class="flex flex-col flex-1 p-sm gap-y-xs">
+    <h3 class="text-body font-medium line-clamp-2">Product Title</h3>
+    <p class="text-foreground-secondary text-caption">Description</p>
+    <div class="mt-auto">
+      <span class="text-heading-6 font-medium">$99.00</span>
+    </div>
+  </div>
+</div>
+```
+
+## Traditional CSS Rules (When Required)
+
+When you must write custom CSS, follow these specificity rules:
+
+## Specificity Rules
+
+- **Never** use IDs as selectors
+- **Avoid** using elements as selectors
+- **Avoid** using `!important` at all costs - if you must use it, comment why in the code
+- Use a `0 1 0` specificity wherever possible, meaning a single `.class` selector.
+- In cases where you must use higher specificity due to a parent/child relationship, try to keep the specificity to a maximum of `0 4 0`
+  - Note that this can sometimes be impossible due to the `0 1 0` specificity of pseudo-classes like `:hover`. There may be situations where `.parent:hover .child` is the only way to achieve the desired effect.
+- **Avoid** complex selectors. A selector should be easy to understand at a glance. Don't over do it with pseudo selectors (:has, :where, :nth-child, etc).
+
+See [MDN](mdc:https:/developer.mozilla.org/en-US/docs/Web/CSS/Specificity) for more a comprehensive list of specificity rules.
+
+## CSS Variables (Limited Use)
+
+**Prefer Tailwind utilities over CSS variables.** Use CSS variables only when:
+
+- **Dynamic runtime values** from Liquid templates (e.g., `{{ section.settings.padding }}px`)
+- **Theme customization** that needs to change globally
+- **Third-party integrations** that require CSS variable APIs
+
+```html
+<!-- ✅ DO: Use Tailwind utilities when possible -->
+<div class="p-md bg-background border-border-01">Content</div>
+
+<!-- ✅ DO: Use CSS variables for dynamic Liquid values -->
+<div
+  class="p-(--section-padding) bg-[--bg-color]"
+  style="
+    --section-padding: {{ section.settings.padding }}px;
+    --bg-color: {{ section.settings.background_color }};
+  "
+>
+  Content
+</div>
+
+<!-- ❌ DON'T: Use CSS variables for static values -->
+<style>
+  .component {
+    --touch-target-size: 44px; /* Use h-11 w-11 instead */
+    height: var(--touch-target-size);
+  }
+</style>
+```
+
+### Global Variables
+
+Global variables should be scoped to the `:root` selector in `snippets/theme-styles-variables.liquid`.
+
+**Example of global variables**
+
+```css
+/* in snippets/theme-styles-variables.liquid */
+:root {
+    --page-width: 1400px;
+     --font-body--family: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }}; /* Referencing a theme setting */
+     --font-{{ preset_name_dash }}--family: {{ settings[preset_font] | prepend: 'var(--font-' | append: '--family)' }}; /* Using Liquid to set a variable */
+}
+```
+
+### Scoped Variables
+
+Be sure to scope your CSS variables to the component they are being used in, if they are not meant to be global. Scoped variables can reference global variables.
+
+**Example of scoped variables**
+
+```css
+/* in assets/facets.css */
+.facets {
+  --drawer-padding: var(--padding-md); /* Referencing a global variable */
+  --facets-upper-z-index: 3;
+  --facets-open-z-index: 4;
+
+  --facets-clear-shadow: 0px -4px 14px 0px rgb(var(--color-foreground-rgb) / var(--opacity-10)); /* Referencing a Color Scheme variable */
+}
+```
+
+### Namespace Your CSS Variables
+
+Namespace your variables to avoid collisions unless you explicitly want them to bleed through to other components.
+
+✅ Do this:
+
+```css
+.component {
+  --component-padding: ...;
+  --component-aspect-ratio: ...;
+}
+```
+
+❌ Don't do this:
+
+```css
+.component {
+  --padding: ...;
+  --aspect-ratio: ...;
+}
+```
+
+### Semantic Color Variables
+
+Use semantic naming for better maintainability:
+
+```css
+:root {
+  /* Base colors */
+  --color-primary: {{ settings.colors_accent_1 }};
+  --color-secondary: {{ settings.colors_accent_2 }};
+
+  /* Semantic colors */
+  --color-text-primary: rgb(var(--color-foreground));
+  --color-text-secondary: rgb(var(--color-foreground) / 0.75);
+  --color-text-disabled: rgb(var(--color-foreground) / 0.38);
+
+  /* Interactive states */
+  --color-interactive-default: rgb(var(--color-accent));
+  /* color-mix isn't supported in earlier version of iOS <16.2 so limit its usage to progressive enhancement */
+  --color-interactive-hover: color-mix(in srgb, rgb(var(--color-accent)) 90%, black);
+  --color-interactive-pressed: color-mix(in srgb, rgb(var(--color-accent)) 80%, black);
+  --color-interactive-disabled: rgb(var(--color-accent) / 0.38);
+}
+```
+
+### Design Token System
+
+Establish consistent spacing and typography scales:
+
+```css
+:root {
+  /* Spacing scale */
+  --space-3xs: 0.25rem; /* 4px */
+  --space-2xs: 0.5rem; /* 8px */
+  --space-xs: 0.75rem; /* 12px */
+  --space-sm: 1rem; /* 16px */
+  --space-md: 1.5rem; /* 24px */
+  --space-lg: 2rem; /* 32px */
+  --space-xl: 3rem; /* 48px */
+  --space-2xl: 4rem; /* 64px */
+  --space-3xl: 6rem; /* 96px */
+
+  /* Typography scale */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+}
+```
+
+## Scoping CSS to Instances of Sections and Blocks
+
+Reset CSS variable values inline on a `style` attribute with a section/block settings. This has a couple benefits:
+
+- Less CSS in Liquid which allows us to use the `{% stylesheet %}` tag for all CSS.
+- Reduces redundancy in CSS selectors and number of selectors in the HTML, i.e. `.selector--{{ block.id }}` pattern.
+
+✅ Do this:
+
+```html
+<section
+  style="
+    --background-color: {{ settings.background_color }};
+    --padding: {{ settings.padding }}px;
+  "
+>
+  ...
+</section>
+
+<button style="--button-color: {{ settings.button_color }};">...</button>
+```
+
+❌ Don't do this:
+
+```html
+{% style %} .selector--{{ block.id }} { --button-color: {{ settings.button_color }}; } {% endstyle %}
+
+<button class="selector--{{ block.id }}">...</button>
+```
+
+### Redundancy
+
+Use variables to reduce property assignment redundancy.
+
+```css
+/* Do this */
+.button {
+  background: rgb(var(--button-color) / 0.75);
+}
+
+.button--secondary {
+  --button-color: var(--secondary-color);
+}
+
+/* Not this */
+.button {
+  background: rgb(var(--primary-color) / 0.75);
+}
+
+.button--secondary {
+  background: rgb(var(--secondary-color) / 0.75);
+}
+```
+
+## Class Naming (Traditional CSS Only)
+
+**Use Tailwind utilities for styling.** Only create custom classes when absolutely necessary.
+
+When you must write custom CSS, use BEM convention:
+
+- **Block**: Component name (`.product-card`)
+- **Element**: Block + element (`.product-card__title`)
+- **Modifier**: Block/element + modifier (`.product-card--featured`)
+- **Use dashes** to separate words in names
+
+```html
+<!-- ✅ DO: Use Tailwind utilities primarily -->
+<div class="group relative flex flex-col bg-background border border-border-01 rounded-sm">
+  <div class="aspect-[3/4] overflow-hidden">
+    <img class="h-full w-full object-cover transition-transform group-hover:scale-105" />
+  </div>
+  <div class="p-sm flex flex-col gap-y-xs">
+    <h3 class="text-body font-medium">Product Title</h3>
+  </div>
+</div>
+
+<!-- ⚠️ ONLY when custom CSS is required -->
+<div class="product-card product-card--featured">
+  <div class="product-card__image">
+    <img class="product-card__img" />
+  </div>
+  <div class="product-card__content">
+    <h3 class="product-card__title">Product Title</h3>
+  </div>
+</div>
+```
+
+```css
+/* Good BEM structure */
+.product-card {
+}
+.product-card__image {
+}
+.product-card__title {
+}
+.product-card__price {
+}
+.product-card--featured {
+}
+.product-card__title--large {
+}
+```
+
+```css
+.block {
+  ...;
+}
+.block--modifier {
+  ...;
+}
+.block__element {
+  ...;
+}
+.block__multi-word-element {
+  ...;
+}
+.block__element--modifier {
+  ...;
+}
+.block__element--multi-word-modifier {
+  ...;
+}
+```
+
+Dashes are used to separate words in blocks, elements, and modifiers.
+
+Exception: We also use global @utility classes that can be applied to block and and elements without following BEM naming convention.
+
+### Naming a "Block" (component)
+
+The root "block" namespace must wrap any elements derived from it.
+
+✅ Do this:
+
+```html
+<div class="my-component">
+  <div class="my-component__wrapper"></div>
+</div>
+```
+
+❌ Not this:
+
+`.my-component__wrapper` is used as a parent to `.my-component`.
+
+```html
+<div class="my-component__wrapper my-component--page-width">
+  <div class="my-component"></div>
+</div>
+```
+
+### Naming an "Element" (child)
+
+There should only be a _single_ "element" in a classname. Only the root "block" name needs to be included in child classnames. If additional naming specificity is necessary, use a "-" to seperate words or consider starting a new BEM scope altogether when an element could make sense as a standalone entity.
+
+✅ Do this:
+
+```html
+<div class="my-component my-component--full-width">
+  <div class="my-component__wrapper">
+    <button class="my-component__button">
+      <span class="my-component__button-label">My button</span>
+    </button>
+  </div>
+</div>
+```
+
+✅ Or this:
+
+Started new scope with `.button-component`.
+
+```html
+<div class="my-component my-component--full-width">
+  <div class="my-component__wrapper">
+    <button class="button-component">
+      <span class="button-component__label">My button</span>
+    </button>
+  </div>
+</div>
+```
+
+❌ Not this:
+
+Multiple element names are used (`__wrapper__button__label`).
+
+```html
+<div class="my-component my-component--full-width">
+  <div class="my-component__wrapper">
+    <button class="my-component__wrapper__button">
+      <span class="my-component__wrapper__button__label">My button</span>
+    </button>
+  </div>
+</div>
+```
+
+### Naming a "Modifier" (variant)
+
+Any "modifier" classname should always use a "--" and should always correspond to an existing block and element namespace. Never use a modifier class on an element that doesn't also have a base classname.
+
+✅ Do this:
+
+The `.button` class is the base classname and modified by `--secondary`.
+
+```html
+<button class="button button--secondary"></button>
+```
+
+❌ Not this:
+
+The `.button` and `.button-secondary` classes are both named as _exclusive_ components and should not used together.
+
+```html
+<button class="button button-secondary"></button>
+```
+
+❌ Or this:
+
+Modifer class is used without corresponding base classname.
+
+```html
+<button class="button--secondary"></button>
+```
+
+Also consider keeping modifiers at the highest element that makes sense. This makes the component more extensible and resilient as styling needs are changed or added in the future.
+
+✅ Do this:
+
+```html
+<div class="my-component my-component--size-large my-component--page-width">
+  <div class="my-component__wrapper"></div>
+</div>
+```
+
+### Utility Classes
+
+Utility classes are intended to act as global overrides for a single styling decision, e.g. alignment, show/hide, etc. BEM conventions are not followed, there is no hierarchy in utility classes and utility classes do not assume they are used with any particular block or element.
+
+Name multi-word utility classes with hyphens `-`. Append any viewport specifications at the **end**, e.g. `hidden-mobile`.
+
+✅ This is fine:
+
+```css
+.align-left {
+  text-align: left;
+}
+```
+
+```html
+<div class="my-component align-left">
+  <p class="my-component__text"></p>
+</div>
+```
+
+## Modern CSS Features
+
+### Container Queries
+
+Use container queries for truly responsive components:
+
+```css
+.product-grid {
+  container-type: inline-size;
+}
+
+@container (min-width: 400px) {
+  .product-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+```
+
+### CSS Functions
+
+Leverage modern CSS functions for better responsiveness:
+
+```css
+.component {
+  /* Fluid spacing */
+  padding: clamp(1rem, 4vw, 3rem);
+
+  /* Intrinsic sizing */
+  width: min(100%, 800px);
+
+  /* Dynamic colors */
+  /* color-mix isn't supported in earlier version of iOS <16.2 so limit its usage */
+  background: color-mix(in srgb, rgb(var(--color-primary)) 90%, white);
+}
+```
+
+### Cascade Layers
+
+For better CSS organization in complex themes:
+
+```css
+@layer reset, base, components, utilities, overrides;
+
+@layer components {
+  .button {
+    /* Component styles here won't conflict with utilities */
+  }
+}
+```
+
+### View Transitions
+
+```css
+@view-transition {
+  navigation: auto;
+}
+
+.page-content {
+  view-transition-name: main-content;
+}
+```
+
+## Media Queries
+
+- Default to mobile first. e.g. `min-width` queries
+- Use `screen` for all media queries
+
+### Breakpoint System
+
+Define consistent breakpoints:
+
+```css
+/* Mobile first breakpoints */
+--breakpoint-sm: 576px; /* Small devices */
+--breakpoint-md: 768px; /* Medium devices */
+--breakpoint-lg: 992px; /* Large devices */
+--breakpoint-xl: 1200px; /* Extra large devices */
+--breakpoint-2xl: 1400px; /* 2X Extra large devices */
+```
+
+### Context-Aware Queries
+
+Use feature queries alongside media queries:
+
+```css
+@supports (display: grid) {
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@supports not (display: grid) {
+  .product-grid {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+```
+
+### Print Styles
+
+Always consider print stylesheets:
+
+```css
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  a[href^='http']:after {
+    content: ' (' attr(href) ')';
+  }
+}
+```
+
+## CSS Nesting Rules
+
+Nesting can make styles harder to read. Be responsible with it.
+
+- **No `&` operator** in nested selectors
+- **Never nest beyond first level** (except media queries/states)
+- **Keep nesting simple** and readable
+- Only use `&` when there is a direct relationship between the two selectors
+  - State based selectors e.g. `&:hover`, `&:focus`, `&:active`
+  - Modifiers that affect each other e.g. `button--integrated { &.button--text }`
+- Never nest beyond the first level
+- See below for exceptions
+
+### Nesting Media Queries
+
+Use nesting for media queries
+
+```css
+.header {
+  width: 100%;
+
+  @media screen and (min-width: 750px) {
+    width: 100px;
+  }
+}
+```
+
+This includes when there is nothing to override, e.g.
+
+```css
+.header {
+  @media screen and (min-width: 750px) {
+    width: 100px;
+  }
+}
+```
+
+That way, if something needs to be added later, it can just be added without needing to flip the media query to the inside.
+
+### If-like Parent-Child Relationships
+
+You may use nesting to help organize parent-child relationship when the parent can have **multiple states or modifiers** that affect children. In the example below, a number of child selectors need to change when the parent is the `--full-width` variant. This saves you from needing to append `parent--full-width` to each css selector.
+
+```css
+.parent {
+  grid-columns: var(--gap) 1fr var(--gap);
+}
+
+.child {
+  grid-column: 2;
+}
+
+.grand-child {
+  ...;
+}
+
+.parent--full-screen {
+  grid-columns: 1fr;
+
+  .child {
+    grid-column: 1;
+  }
+
+  .grand-child {
+    ...;
+  }
+}
+```
+
+In cases like this, the styles that are being applied are the direct result of the parent's modifier. We can see this as a kind of if-like relationship where the logic is easier to follow if the child styles are nested inside the parent.
+
+This is not a reason to nest multiple levels. Maintain the single level rule.
+
+## Logical Properties
+
+Where appropriate, use logical properties to have baseline support for Right-to-Left (RTL) languages.
+Focusing on these properties:
+
+- padding
+- margin
+- border
+- text-align
+- top, bottom, left, right
+
+✅ Do this:
+
+```css
+.element {
+  padding-inline: 2rem;
+  padding-block: 1rem;
+  margin-inline: auto;
+  margin-block: 0;
+  border-inline-end: 1rem solid var(--color-background);
+  text-align: start;
+  inset: 0;
+}
+```
+
+❌ Not this:
+
+```css
+.element {
+  padding: 1rem 2rem;
+  margin: 0 auto;
+  border-bottom: 1rem solid var(--color-background);
+  text-align: left;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+```
+
+## Layout Patterns
+
+### CSS Grid for Layouts
+
+```css
+.section-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+}
+```
+
+### Flexbox for Components
+
+```css
+.product-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+```
+
+### Aspect Ratio for Media
+
+```css
+.product-card__image {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+```
+
+## Fancy Selectors
+
+### Using `:is()`
+
+When giving the same styles to multiple selectors, use a comma separated list.
+
+✅ Do this:
+
+```css
+.facets__label,
+.facets__clear-all,
+.clear-filter {
+  ...;
+}
+```
+
+❌ Not this:
+
+```css
+:is(.facets__label, .facets__clear-all, .clear-filter) {
+  ...;
+}
+```
+
+However, if you are giving the same styles to a parent-child relationship with different selectors, you may use `:is()`.
+
+✅ Do this:
+
+```css
+.parent:is(.child-1, .child-2) {
+  ...;
+}
+```
+
+❌ Not this:
+
+```css
+.parent .child-1,
+.parent .child-2 {
+  ...;
+}
+```
+
+✅ Do this:
+
+```css
+:is(.parent, .parent-2) .child {
+  ...;
+}
+```
+
+❌ Not this:
+
+```css
+.parent .child,
+.parent-2 .child {
+  ...;
+}
+```
+
+Try to keep the same specificity for all selectors within a single `:is()` to avoid increasing the overall specificity of the selector unintentionally.
+
+## Accessibility
+
+### Motion and Animation
+
+- Always respect user motion preferences
+- Provide fallbacks for users who prefer reduced motion
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+```
+
+### Focus Management
+
+- Ensure all interactive elements have visible focus indicators
+- Use `:focus-visible` for better UX
+
+```css
+.button:focus-visible {
+  outline: 2px solid rgb(var(--color-focus));
+  outline-offset: 2px;
+}
+```
+
+### Color and Contrast
+
+- Maintain WCAG AA contrast ratios (4.5:1 for normal text, 3:1 for large text)
+- Test with high contrast mode
+- Never rely solely on color to convey information
+
+```css
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark theme variables */
+  }
+}
+```
+
+## Performance Considerations
+
+### Animation Performance
+
+- Use `transform` and `opacity` for animations
+- Avoid animating layout properties (`width`, `height`, `margin`, `padding`)
+- Use `will-change` sparingly and remove after animation
+
+```css
+.product-card {
+  transition: transform 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-2px); /* Better than animating top/margin */
+}
+
+/* Only use will-change during animation */
+.product-card:hover {
+  will-change: transform;
+}
+
+.product-card:not(:hover) {
+  will-change: auto;
+}
+```
+
+### Layout Performance
+
+- Use `contain` property for better rendering performance
+- Prefer CSS Grid and Flexbox over complex positioning
+
+```css
+.product-grid {
+  contain: layout style paint;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+```
+
+## CSS Organization
+
+### CSS Property Order
+
+Maintain consistent property order within declarations:
+
+```css
+.component {
+  /* 1. Layout & Positioning */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  /* 2. Box Model */
+  width: 100%;
+  margin: 0;
+  padding: var(--space-md);
+  border: 1px solid rgb(var(--color-border));
+
+  /* 3. Typography */
+  font-family: var(--font-body-family);
+  font-size: var(--font-size-base);
+
+  /* 4. Visual */
+  background: rgb(var(--color-surface));
+  color: rgb(var(--color-text));
+
+  /* 5. Animation & Transforms */
+  transition: transform 0.2s ease;
+}
+```
+
+## Error Prevention
+
+### Common Pitfalls
+
+- **Never** use `position: fixed` without considering mobile keyboards
+- **Always** test with zoom up to 200%
+- **Avoid** magic numbers - use variables or calc() instead
+- **Remember** that `vh` units can be problematic on mobile, use `dvh` to mitage this
+
+### Defensive CSS
+
+Write CSS that gracefully handles edge cases:
+
+```css
+.product-card {
+  /* Prevent content overflow */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+
+  /* Handle long content */
+  min-width: 0; /* Allows flex items to shrink below content size */
+
+  /* Prevent layout shift */
+  aspect-ratio: 1 / 1;
+
+  /* Fallback for missing images */
+  background: rgb(var(--color-surface-secondary));
+}
+```
+
+### Browser Support
+
+- Test in browsers used by your audience
+- Provide fallbacks for newer CSS features
+- Use progressive enhancement approach
+
+## CSS Documentation
+
+### Commenting Standards
+
+Use consistent commenting for better maintainability:
+
+```css
+/* =============================================================================
+   Component Name
+   ============================================================================= */
+
+/**
+ * Brief component description
+ *
+ * @example
+ * <div class="component component--modifier">
+ *   <div class="component__element">Content</div>
+ * </div>
+ */
+.component {
+  /* Implementation */
+}
+
+/* Component modifiers
+   ========================================================================== */
+
+/**
+ * Modifier description
+ */
+.component--modifier {
+  /* Modifier styles */
+}
+
+/* Component elements
+   ========================================================================== */
+
+/**
+ * Element description
+ */
+.component__element {
+  /* Element styles */
+}
+```
+
+## Tailwind v4 Integration Patterns
+
+### Design System Integration
+
+Leverage the `@meetdomaine/tailwind-syrah` plugin for consistent design tokens:
+
+```css
+/* src/styles/@theme.css - Define custom design tokens */
+@theme {
+  --font-family-primary: 'GT Alpina';
+  --font-family-secondary: 'Graphik';
+
+  /* Button variants automatically generated */
+  --button-primary-bg: var(--color-foreground);
+  --button-primary-color: var(--color-foreground-secondary-inverse);
+
+  /* Custom utilities */
+  --max-width-container: 1400px;
+}
+
+@utility btn {
+  @apply uppercase tracking-[0.05em] px-6 py-3 rounded-full transition-colors;
+}
+```
+
+### Section Structure with Tailwind
+
+```liquid
+<!-- ✅ DO: Tailwind-first approach -->
+<section
+  class='py-sm @container'
+  style='
+    --section-padding: {{ section.settings.padding | default: 60 }}px;
+    --bg-color: {{ section.settings.background_color | default: 'var(--color-background)' }};
+  '
+>
+  <div class='container mx-auto px-pagemargin py-(--section-padding) bg-[--bg-color]'>
+    <div class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-{{ section.settings.columns | default: 4 }} gap-md @[768px]:grid-cols-{{ section.settings.columns | default: 4 }}'>
+      {% for block in section.blocks %}
+        <div class='flex flex-col bg-background border border-border-01 rounded-sm p-md hover:shadow-md transition-shadow motion-reduce:transition-none'>
+          {{ block.settings.content }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ⚠️ ONLY use {% stylesheet %} for complex CSS that Tailwind can't handle -->
+{% stylesheet %}
+  /* Only for vendor-specific or complex animations */
+  @keyframes slideIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+
+  .featured-collection[data-animate="true"] {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .featured-collection[data-animate="true"] {
+      animation: none;
+    }
+  }
+{% endstylesheet %}
+```
+
+### Component Patterns
+
+```html
+<!-- Product Grid with Tailwind -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-md">
+  {% for product in collection.products %}
+    <div class="group relative flex flex-col bg-background border border-border-01 rounded-sm overflow-hidden hover:shadow-md transition-shadow">
+      <div class="aspect-[3/4] bg-background-secondary overflow-hidden">
+        {% render 'image',
+          image: product.featured_image,
+          class: 'h-full w-full object-cover transition-transform group-hover:scale-105',
+          sizes: '(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw'
+        %}
+      </div>
+      <div class="p-sm flex flex-col gap-y-xs flex-1">
+        <h3 class="text-body font-medium line-clamp-2">{{ product.title }}</h3>
+        <p class="text-foreground-secondary text-caption line-clamp-2">{{ product.description | strip_html | truncate: 100 }}</p>
+        <div class="mt-auto flex items-center justify-between">
+          <span class="text-heading-6 font-medium">{{ product.price | money }}</span>
+          <button class="btn btn-primary">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+```

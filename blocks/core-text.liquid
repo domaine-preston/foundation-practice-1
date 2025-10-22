@@ -1,0 +1,73 @@
+{%- render 'core-text', block: block -%}
+{% schema %}
+{
+  "name": "t:names.core-text",
+  "tag": null,
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "t:content.text"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_custom_spacing",
+      "label": "t:spacing.use_custom_spacing.label",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_top",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline_end",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_inline_end",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_bottom",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline_start",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_inline_start",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.core-text",
+      "category": "t:preset_categories.core-basic",
+      "settings": {
+        "text": "<p>We make things that work better and last longer. Our products solve real problems with clean design and honest materials.</p>"
+      }
+    }
+  ]
+}
+{% endschema %}

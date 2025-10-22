@@ -1,0 +1,51 @@
+{% doc %}
+  Renders a swatch input component for product options with color/pattern swatches.
+
+  @param {string} id - Unique input id
+  @param {string} [type] - Input type: 'radio' or 'checkbox' (default: 'radio')
+  @param {string} name - Input name (will be prefixed with product_form_id)
+  @param {string} value - Input value
+  @param {object} swatch - Swatch object with color/pattern data
+  @param {string} product_form_id - Id of the form associated with the input
+  @param {boolean} [checked] - Default checked status
+  @param {boolean} [disabled] - Default disabled status
+  @param {string} [help_text] - Additional content to render inside the label
+  @param {string} [additional_props] - Additional properties to attach to the input
+  @param {string} [shape] - Shape of the swatch display
+  @param {boolean} [available] - Whether the option is available
+  @param {string} [unavailable_text] - Text to show when option is unavailable
+
+  @example
+  {% render 'swatch-input', id: input_id, name: input_name, value: input_value, swatch: swatch, product_form_id: product_form_id, checked: checked %}
+{% enddoc %}
+
+<div class='group/swatch'>
+  <input
+    type='{{ type | default: 'radio' }}'
+    id='{{ id }}'
+    name='{{ product_form_id }}--{{ name }}'
+    value='{{ value }}'
+    form='{{ product_form_id }}'
+    class='sr-only'
+    {% if checked %}
+      checked
+    {% endif %}
+    {% if disabled %}
+      disabled
+    {% endif %}
+    {% if additional_props %}
+      {{ additional_props }}
+    {% endif %}
+  >
+  <label
+    for='{{ id }}'
+    title='{{ value }}'
+    class='cursor-pointer px-5 py-2 bg-background-secondary group-has-[:checked]/swatch:bg-transparent flex items-center p group-has-[:checked]/swatch:ring-1 rounded-full ring-(--color-foreground) transition duration-300 ease-in-out group-focus-within/swatch:ring-1 group-focus-within/swatch:ring-(--color-foreground)/50'
+  >
+    {% render 'swatch', swatch: swatch, shape: shape %}
+    {{ help_text }}
+    {% unless available %}
+      {{ unavailable_text }}
+    {% endunless %}
+  </label>
+</div>

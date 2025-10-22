@@ -1,0 +1,50 @@
+{%- render 'accordion-item',
+  id: block.id,
+  title: block.settings.title,
+  content: block.settings.content,
+  open: block.settings.open_by_default,
+  attributes: block.shopify_attributes,
+  group_name: block.settings.group_name,
+  rte: true
+-%}
+
+{% schema %}
+{
+  "name": "t:names.core-accordion",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:content.title"
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "t:content.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_by_default",
+      "label": "t:content.open_by_default",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "group_name",
+      "label": "t:content.group",
+      "info": "Provides a group name to allow only one item in the group to be open at a time."
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.core-accordion",
+      "category": "t:preset_categories.core-basic",
+      "settings": {
+        "title": "Return policy",
+        "content": "<p>Our goal is for every customer to be totally satisfied with their purchase. If this isn't the case, let us know and we'll do our best to work with you to make it right.</p>"
+      }
+    }
+  ]
+}
+{% endschema %}

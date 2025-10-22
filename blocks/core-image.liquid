@@ -1,0 +1,200 @@
+{% doc %}
+  Returns the HTML for a core image block with optional link and responsive images.
+
+  @param {string} wrapper_classes - The classes to apply to the wrapper element.
+{% enddoc %}
+{%- liquid
+  assign image = block.settings.desktop_image
+  assign link = block.settings.link
+  assign mobile_image = block.settings.mobile_image
+  assign image_fit = block.settings.image_fit | default: 'object-cover'
+  assign image_ratio = block.settings.image_ratio | default: ''
+  capture spacing_tokens
+    render '@spacing-padding', spacing_settings: block.settings, default_token: ''
+  endcapture
+  assign section_index = section.index0
+  assign loading = 'eager'
+  assign preload = true
+  assign fetchpriority = 'high'
+
+  if section_index > 1
+    assign loading = 'lazy'
+    assign preload = false
+    assign fetchpriority = 'low'
+  endif
+-%}
+{%- if link != blank -%}
+  <a href='{{ link }}' class='block {{ wrapper_classes }}'>
+{%- endif -%}
+{%- if spacing_tokens != blank or image_ratio != blank -%}
+  <div
+    class='{{ spacing_tokens | strip | strip_newlines }} {{ image_ratio | strip | strip_newlines }} overflow-hidden {{ wrapper_classes }}'
+  >
+{%- endif -%}
+{%- if mobile_image == blank -%}
+  {%- if image != blank -%}
+    {%- render 'image',
+      width: image.width,
+      image: image,
+      alt: image.alt,
+      sizes: '100vw',
+      widths: '320, 640, 960, 1280, 1600, 1920',
+      preload: preload,
+      loading: loading,
+      object_fit: image_fit,
+      container: false,
+      class: 'h-full',
+      fetchpriority: fetchpriority
+    -%}
+  {%- else -%}
+    {{ 'detailed-apparel-1' | placeholder_svg_tag: 'size-full' }}
+  {%- endif -%}
+{%- else -%}
+  {%- render 'picture',
+    mobile_image: mobile_image,
+    image: image,
+    sizes: '100vw',
+    object_fit: image_fit,
+    loading: loading,
+    preload: preload,
+    widths: '320, 640, 960, 1280, 1600, 1920',
+    class: 'h-full',
+    fetchpriority: fetchpriority
+  -%}
+{%- endif -%}
+<div class='inset-0 absolute w-full [background:var(--bg)]' style='--bg: {{ block.settings.background }}'></div>
+{%- if spacing_tokens != blank or image_ratio != blank -%}
+  </div>
+{%- endif -%}
+{%- if link != blank -%}
+  </a>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:names.core-image",
+  "class": "relative w-full",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "desktop_image",
+      "label": "t:content.desktop_image"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "t:content.mobile_image"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:content.link"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "t:content.aspect_ratio",
+      "options": [
+        {
+          "value": "",
+          "label": "t:options.aspect_auto"
+        },
+        {
+          "value": "aspect-[9/16]",
+          "label": "t:options.aspect_portrait"
+        },
+        {
+          "value": "aspect-video",
+          "label": "t:options.aspect_landscape"
+        },
+        {
+          "value": "aspect-square",
+          "label": "t:options.aspect_square"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "label": "t:content.image_fit",
+      "options": [
+        {
+          "value": "fill",
+          "label": "t:options.object_fill"
+        },
+        {
+          "value": "contain",
+          "label": "t:options.object_contain"
+        },
+        {
+          "value": "cover",
+          "label": "t:options.object_cover"
+        }
+      ]
+    },
+    {
+      "type": "color_background",
+      "id": "background",
+      "label": "t:options.background",
+      "info": "t:info.overlay"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_custom_spacing",
+      "label": "t:spacing.use_custom_spacing.label",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_top",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline_end",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_inline_end",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_bottom",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline_start",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_inline_start",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.core-image",
+      "category": "t:preset_categories.core-basic"
+    }
+  ]
+}
+{% endschema %}

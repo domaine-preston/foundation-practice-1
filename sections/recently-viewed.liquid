@@ -1,0 +1,116 @@
+{%- render '@needs-script', entries: 'core-recently-viewed,core-carousel' -%}
+{%- liquid
+  assign mod_settings = section.settings
+  assign section_id = section.id
+-%}
+{% render '@needs-script', entries: 'core-carousel' %}
+
+{% assign width = 100.0 | divided_by: mod_settings.items_to_show | append: '%' %}
+{% assign number_of_gaps = mod_settings.items_to_show | minus: 1.0 %}
+{% assign number_of_gaps = number_of_gaps | divided_by: mod_settings.items_to_show %}
+{% assign mobile_width = '61vw' %}
+{% comment %} {% assign mobile_number_of_gaps = 1 %} {% endcomment %}
+{% if mod_settings.items_to_show_mobile > 1 %}
+  {% assign mobile_width = 100.0 | divided_by: mod_settings.items_to_show_mobile | append: '%' %}
+{% endif %}
+<style>
+  .core-carousel--{{ section_id }} {
+    --core-carousel-slide-width: {{ mobile_width  }};
+    --core-carousel-slide-gap-per-slide: {{ mod_settings.slides_gap | times: number_of_gaps }}px;
+    --core-carousel-gap: {{ mod_settings.slides_gap }}px;
+  }
+
+  @media screen and (min-width: 768px) {
+    .core-carousel--{{ section_id }} {
+      --core-carousel-slide-width: {{ width }};
+      --core-carousel-slide-gap-per-slide: {{ mod_settings.slides_gap | times: number_of_gaps }}px;
+    }
+  }
+</style>
+
+{%- capture slides_gap_token -%}
+  {%- render '@gap-token', value: section.settings.slides_gap -%}
+{%- endcapture -%}
+
+<recently-viewed
+  exclude-product-handle='{{ product.handle }}'
+  class='hidden'
+  carousel-props='
+    {
+      "itemsToScroll": {{ mod_settings.items_to_scroll_desktop }},
+      "itemsToShow": {{ mod_settings.items_to_show }},
+      "itemsToShowMobile": {{ mod_settings.items_to_show_mobile }},
+      "slidesGap": {{ mod_settings.slides_gap }},
+      "slidesGapToken": {{ slides_gap_token | strip | strip_newlines | json }}
+    }
+  '
+>
+  <div class='2xl:container px-pagemargin py-sm'>
+    <div class='md:flex md:items-center md:justify-between'>
+      {%- content_for 'block', id: 'title', type: 'core-heading' -%}
+    </div>
+
+    <div data-recently-viewed class='py-md core-carousel--{{ section_id }}'></div>
+  </div>
+</recently-viewed>
+
+{% schema %}
+{
+  "name": "t:sections.recently_viewed.title",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "number",
+      "id": "limit",
+      "label": "t:sections.recently_viewed.limit",
+      "default": 6
+    },
+    {
+      "type": "header",
+      "content": "t:names.core-carousel"
+    },
+    {
+      "type": "range",
+      "id": "slides_gap",
+      "label": "t:settings.slides_gap",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "items_to_scroll_desktop",
+      "min": 1,
+      "max": 10,
+      "default": 4,
+      "step": 1,
+      "label": "t:settings.items_to_scroll_desktop"
+    },
+    {
+      "type": "range",
+      "id": "items_to_show",
+      "min": 1,
+      "max": 10,
+      "default": 4,
+      "step": 0.5,
+      "label": "t:settings.items_to_show"
+    },
+    {
+      "type": "range",
+      "id": "items_to_show_mobile",
+      "min": 1,
+      "max": 10,
+      "default": 1,
+      "step": 0.5,
+      "label": "t:settings.items_to_show_mobile"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.recently_viewed.title",
+      "category": "t:preset_categories.core"
+    }
+  ]
+}
+{% endschema %}

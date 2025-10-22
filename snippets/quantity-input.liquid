@@ -1,0 +1,87 @@
+{% doc %}
+  Renders a quantity input component with increment/decrement controls.
+  Integrates with cart quantity rules and variant inventory limits.
+
+  @param {object} variant - Product variant object with quantity rules
+  @param {number} [quantity] - Initial quantity value (defaults to cart quantity or 1)
+  @param {number} [max] - Maximum quantity allowed (defaults to variant.quantity_rule.max)
+  @param {object} [cart_item] - Cart item object for cart updates
+
+  Features: - Quantity increment/decrement buttons - Respects variant quantity rules (min/max) - Shows current cart
+  quantity for variant - Prevents exceeding inventory limits - Real-time cart integration - Accessible button controls
+  with ARIA labels
+
+  Styling: - Rounded button design with grid layout - Responsive sizing (mobile/desktop) - Hover states and visual
+  feedback - Consistent with design system
+
+  @example
+  {% render 'quantity-input', variant: variant, quantity: 2, max: 10 %}
+{% enddoc %}
+
+{%- assign cart_quantity = cart | item_count_for_variant: variant.id -%}
+{%- assign current_quantity = quantity | default: cart_quantity | default: 1 -%}
+{% assign max = max | default: variant.quantity_rule.max %}
+<quantity-input
+  class='grid grid-cols-[38px_27px_38px] lg:grid-cols-[38px_40px_38px] border-solid border border-border-01 rounded-full max-w-fit relative bg-background hover:bg-background-secondary'
+  variant-id='{{ variant.id }}'
+  cart-quantity='{{ cart_quantity }}'
+  min='{{ variant.quantity_rule.min }}'
+  value='{{ current_quantity }}'
+  {% if max != null %}
+    max='{{ max | minus: cart_quantity }}'
+  {% endif %}
+
+  {% if cart_item != blank %}
+    key='{{ cart_item.key }}'
+  {% endif %}
+>
+  <button
+    class='inline-flex items-center justify-center aspect-square text-utility disabled:opacity-50 disabled:pointer-events-none '
+    name='minus'
+    type='button'
+    id='{{ id }}__decrement'
+  >
+    <span class='sr-only'>
+      {{- 'products.product.quantity.decrease' | t: product: product.title | escape -}}
+    </span>
+    {%- render 'icon' with 'icon-minus' -%}
+  </button>
+  <input
+    class='text-center remove-arrow text-base'
+    type='number'
+    name='{{ name | default: 'quantity' }}'
+    value='{{ current_quantity }}'
+    inputmode='numeric'
+    min='0'
+    {% if max != null %}
+      max='{{ max | minus: cart_quantity }}'
+    {% endif %}
+    step='{{ variant.quantity_rule.increment }}'
+    aria-label='{{ 'products.product.quantity.input_label' | t: product: product.title | escape }}'
+    id='{{ id }}'
+
+    {% if form_id != blank %}
+      form='{{ form_id }}'
+    {% endif %}
+  >
+  <button
+    class='inline-flex items-center justify-center aspect-square text-utility disabled:opacity-50'
+    name='plus'
+    type='button'
+    id='{{ id }}__increment'
+    aria-describedby='{{ id }}__tooltip'
+  >
+    <span class='sr-only'>
+      {{- 'products.product.quantity.increase' | t: product: product.title | escape -}}
+    </span>
+    {%- render 'icon' with 'icon-plus' -%}
+  </button>
+  <div
+    id='{{ id }}__tooltip'
+    data-tooltip
+    role='tooltip'
+    class='bg-background-secondary p-xs rounded-xs w-max absolute top-0 left-0 hidden'
+  >
+    {{ 'products.product.quantity.max_quantity_reached' | t }}
+  </div>
+</quantity-input>

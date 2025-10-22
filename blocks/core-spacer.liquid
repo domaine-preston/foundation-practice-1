@@ -1,0 +1,90 @@
+{%- assign mod_settings = block.settings -%}
+{% capture spacer_classes %}
+  {%- if mod_settings.custom_mobile_size -%}
+    {%- if mod_settings.direction == 'vertical' -%}
+      {% render '@height-token', value: mod_settings.mobile_size_token %} {% render '@height-token', value: mod_settings.size_token, media: 'md' %}
+    {%- else -%}
+      {% render '@width-token', value: mod_settings.mobile_size_token %} {% render '@width-token', value: mod_settings.size_token, media: 'md' %}
+    {%- endif -%}
+  {%- else -%}
+    {%- if mod_settings.direction == 'vertical' -%}
+      {% render '@height-token', value: mod_settings.size_token %}
+    {%- else -%}
+      {% render '@width-token', value: mod_settings.size_token %}
+    {%- endif -%}
+  {%- endif -%}
+
+  {% if request.visual_preview_mode %}
+    !size-10
+  {% endif %}
+{% endcapture %}
+<div
+  class='spacer-block {{ spacer_classes | strip | strip_newlines }}'
+  {{ block.shopify_attributes }}
+  data-testid='spacer-block'
+></div>
+
+{% schema %}
+{
+  "name": "t:names.core-spacer",
+  "tag": null,
+  "settings": [
+    {
+      "type": "range",
+      "id": "size_token",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:settings.size",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "direction",
+      "label": "t:content.direction",
+      "options": [
+        {
+          "value": "horizontal",
+          "label": "t:settings.horizontal"
+        },
+        {
+          "value": "vertical",
+          "label": "t:settings.vertical"
+        }
+      ],
+      "default": "vertical"
+    },
+    {
+      "type": "checkbox",
+      "id": "custom_mobile_size",
+      "label": "t:settings.custom_mobile_size",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:content.mobile_size",
+      "visible_if": "{{ block.settings.custom_mobile_size == true }}"
+    },
+    {
+      "type": "range",
+      "id": "mobile_size_token",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:settings.size",
+      "default": 0,
+      "visible_if": "{{ block.settings.custom_mobile_size == true }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.core-spacer",
+      "category": "t:preset_categories.core-basic",
+      "settings": {
+        "size_token": 4,
+        "direction": "horizontal"
+      }
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,84 @@
+# AUTO QA THEME DEPLOYMENT WORKFLOW
+# ---------------------------------
+# This workflow is automatically triggered when a PR is merged into the develop branch
+# This ensures the QA theme is always up to date with the latest changes
+# It can also be ran manually by clicking the "Run workflow" button in the Github Actions tab
+
+# NOTE: JSON config files will not be pushed as they are being ignored in the .shopifyignore file
+
+# Required Github enviroment secrets / variables:
+# - SHOPIFY_CLI_THEME_TOKEN: Shopify CLI token
+# - SHOPIFY_FLAG_STORE: Shopify store URL
+# - QA_THEME_ID: Shopify theme ID
+# - SOURCE_THEME_ID: Optional source theme ID to sync JSON content from. By default, JSON content is synced from the published theme.
+
+# These need to be added via the Github repo settings under "Environments"
+
+name: Deploy QA theme
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+run-name: Deploying ${{ github.head_ref || github.ref_name || github.ref || github.event.ref }} to QA Themes (@${{ github.actor }})
+
+jobs:
+  deploy:
+    if: ${{ vars.QA_THEME_ID }} != null
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [Development, Sales Eng, Core]
+    environment: ${{ matrix.environment }}
+    # Set the environment value to the name of the environment in the Github repo settings
+    env:
+      SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+      SHOPIFY_FLAG_STORE: '${{ vars.SHOPIFY_FLAG_STORE }}'
+      QA_THEME_ID: '${{ vars.QA_THEME_ID }}'
+      SOURCE_THEME_ID: '${{ vars.SOURCE_THEME_ID }}'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate theme IDs if source theme is set
+        if: ${{ env.SOURCE_THEME_ID != '' }}
+        run: |
+          if [[ -n "${{ env.QA_THEME_ID }}" && -n "${{ env.SOURCE_THEME_ID }}" && "${{ env.QA_THEME_ID }}" == "${{ env.SOURCE_THEME_ID }}" ]]; then
+            echo "❌ ERROR: QA_THEME_ID and SOURCE_THEME_ID cannot be the same ID!"
+            echo "QA_THEME_ID: ${{ env.QA_THEME_ID }}"
+            echo "SOURCE_THEME_ID: ${{ env.SOURCE_THEME_ID }}"
+            echo "This would cause the QA theme to sync JSON content from itself, which is not allowed."
+            exit 1
+          fi
+          echo "✅ QA Theme ID and Source Theme ID validation passed"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 18
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1
+          bundler: 'latest'
+
+      - name: Install Shopify CLI
+        run: npm install -g @shopify/cli@3.85.4
+
+      - name: Install Dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build
+        run: npx turbo build
+
+      - name: Deploy theme
+        # NOTE: JSON config files will not be pushed as they are being ignored in the .shopifyignore file
+        run: shopify theme push --theme "${{ env.QA_THEME_ID }}"
+
+      - uses: meetdomaine/shopify-jsons-sync@v1.5.2
+        # This action is used to sync new JSON content (locale strings & JSON templates) to the theme
+        # Note: No existing content on the theme being deployed too will be edited or pushed
+        with:
+          store: '${{ env.SHOPIFY_FLAG_STORE }}'
+          theme: '${{ env.QA_THEME_ID }}'
+          source-theme: ${{ env.SOURCE_THEME_ID != '' && env.SOURCE_THEME_ID || null }}

@@ -1,0 +1,102 @@
+{% doc %}
+  Renders a modal dialog with customizable content and behavior.
+
+  @param {string} id - Unique identifier for the modal (required)
+  @param {string} [title] - Title text for the modal header
+  @param {string} [content] - Main content of the modal
+  @param {string} [type] - Type of modal: 'drawer' (default) or 'modal'
+  @param {string} [anchor] - Position for drawer type: 'left' (default) or 'right'
+  @param {string} [size] - Size class for the modal (e.g. 'modal-max')
+  @param {boolean} [close_on_backdrop_click] - Whether clicking backdrop closes modal (default: true)
+  @param {boolean} [without_title] - Whether to hide the title section (default: false)
+  @param {boolean} [with_footer] - Whether to include a footer (default: false)
+  @param {boolean} [open] - Whether modal is open by default (default: false)
+  @param {string} [class] - Additional CSS classes for the modal
+  @param {string} [header_classes] - CSS classes for the header section
+  @param {string} [parent_class] - CSS class for parent container
+  @param {string} [close_icon_size] - Size for the close icon
+  @param {string} [url] - URL for the modal
+  @param {string} [attributes] - Additional HTML attributes
+
+  @example
+  {% render 'modal-dialog', id: 'product-modal', title: 'Product Details', content: product_content, type: 'modal' %}
+{% enddoc %}
+
+{%- liquid
+  assign id = id
+  assign title = title
+  assign anchor = anchor | default: 'left'
+  assign type = type | default: 'drawer'
+  assign size = size
+  assign close_on_backdrop_click = close_on_backdrop_click | default: true, allow_false: true
+  assign header_classes = header_classes
+  assign close_icon_size = close_icon_size
+  assign without_title = without_title | default: false, allow_false: true
+  assign content = content
+  assign with_footer = with_footer | default: false, allow_false: true
+  assign url = url | default: blank
+  assign attributes = attributes | default: blank
+  assign parent_class = parent_class | default: blank
+  assign open = open | default: false, allow_false: true
+-%}
+{%- if id != blank -%}
+  <modal-dialog
+    cloak
+    type='{{ type }}'
+    id='{{ id }}'
+
+    {% if url %}
+      url='{{ url }}'
+    {% endif %}
+
+    {% if size != blank %}
+      size='{{ size }}'
+    {% endif %}
+
+    {% if type == 'drawer' %}
+      anchor='{{ anchor }}'
+    {% endif %}
+
+    {% if close_on_backdrop_click %}
+      close-on-backdrop-click='true'
+    {% endif %}
+
+    {% if without_title != blank %}
+      without-title='true'
+    {% endif %}
+
+    {% if class != blank %}
+      class='{{ class }}'
+    {% endif %}
+
+    {% if header_classes != blank %}
+      header-classes='{{ header_classes }}'
+    {% endif %}
+
+    {% if close_icon_size != blank %}
+      close-icon-size='{{ close_icon_size }}'
+    {% endif %}
+
+    {% if with_footer %}
+      with-footer='true'
+    {% endif %}
+
+    {% if parent_class != blank %}
+      parent-class='{{ parent_class }}'
+    {% endif %}
+
+    {% if attributes != blank %}
+      {{ attributes }}
+    {% endif %}
+
+    {% if open %}
+      open
+    {% endif %}
+  >
+    {%- if title != blank -%}
+      <h5 slot='header' class='h5' data-slot='header'>{{ title }}</h5>
+    {%- endif -%}
+
+    {{ content }}
+  </modal-dialog>
+{%- endif -%}

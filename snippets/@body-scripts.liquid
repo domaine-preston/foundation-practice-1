@@ -1,0 +1,16 @@
+{%- if content contains '<modal-dialog' -%}
+  {%- render '@needs-script', entries: 'core-dialog' -%}
+{%- endif -%}
+
+{%- if content contains '<swiper' -%}
+  {%- render '@needs-script', entries: 'core-vendor-swiper' -%}
+{%- endif -%}
+{%- render '@needs-script', entries: 'core-dynamic-product-card' -%}
+
+{% comment %}
+  Vendor scripts
+{% endcomment %}
+
+{%- if settings.nosto_enable -%}
+  {% render '-vendor-nosto' %}
+{%- endif -%}

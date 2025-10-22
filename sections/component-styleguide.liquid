@@ -1,0 +1,623 @@
+{%- capture color_scheme -%}
+  {%- render '@color-scheme', color_scheme: section.settings.color_scheme -%}
+{%- endcapture -%}
+
+<div class='{{ color_scheme }} grid grid-cols-1 divide-y divide-border-01 bg-background py-lg'>
+  <section class='flex flex-col gap-lg px-pagemargin py-lg'>
+    <h1>Type Styles</h1>
+    <div class='grid grid-cols-1 md:grid-cols-2'>
+      <p class='p text-foreground'>
+        We use fluid scaling for typography, meaning we don’t need to specify exact breakpoints. Instead, we define
+        sizes for desktop & mobile and use relative units for the other values to allow the styles to scale seamlessly
+        without much work. With this in mind, it’s important to ensure line-height and letter-spacing are set in
+        percentage (%) values, not pixels.
+      </p>
+    </div>
+    <div class='grid grid-cols-1 gap-md'>
+      <h1 class='font-roboto transition-all hover:font-roboto-exploded'>Variable font 1</h1>
+      <h2 class='font-roboto-bold transition-all hover:font-roboto-exploded'>Variable font 2</h2>
+      <h3 class='font-roboto-medium transition-all hover:font-roboto-exploded'>Variable font 3</h3>
+      <h4>Heading 4</h4>
+      <h5>Heading 5</h5>
+      <h6>Heading 6</h6>
+      <p>Body</p>
+      <p class='caption'>Caption</p>
+      <p class='utility'>Utility</p>
+      {%- render 'hover-text' -%}
+    </div>
+  </section>
+
+  <section class='flex flex-col gap-lg px-pagemargin py-lg'>
+    <h1>Fluid Utility</h1>
+    <p class='p text-foreground'>
+      We <a>use</a> fluid scaling for utility classes, meaning we don’t need to specify exact breakpoints. Instead, we
+      define sizes for desktop & mobile and use relative units for the other values to allow the styles to scale
+      seamlessly without much work.
+    </p>
+    <div class='grid grid-cols-1 gap-md bg-background-secondary p-md'>
+      <p>Following are the utilities are available available:</p>
+      <ul class='list-inside list-disc'>
+        <li class='fluid-text-[10|12]'><code>fluid-text-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-line-height-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-gap-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-pl-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-pr-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-pb-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-pt-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-ml-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-mr-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-mb-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-mt-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-inset-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-top-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-right-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-bottom-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-left-[mobile&#124;desktop]</code></li>
+        <li class='fluid-text-[10|12]'><code>fluid-size-[mobile&#124;desktop]</code></li>
+      </ul>
+
+      <p>
+        Note: Replace <code>mobile</code> with Mobile Pixel Size Base and <code>desktop</code> with Desktop Size base
+      </p>
+    </div>
+    <div class='grid grid-cols-1 gap-md'>
+      <h3 class='underline'>Examples:</h3>
+      <p class='fluid-text-[12|16]'>Fluid, 12|16</p>
+      <p class='fluid-text-[30|70]'>Fluid, 30|70</p>
+      <span class='spacing-token fluid-size-[200|400]'>
+        <pre>fluid-size-[200|400]</pre>
+      </span>
+    </div>
+  </section>
+
+  <section class='grid grid-cols-1 gap-md px-pagemargin py-lg'>
+    <h1>Buttons</h1>
+    <div class='grid grid-cols-1 gap-md lg:grid-cols-3'>
+      <div class='grid grid-cols-1 gap-sm rounded-xs border border-dashed border-border-01 p-pagemargin'>
+        <button class='btn' variant='primary'>Button Primary</button>
+        <button class='btn' disabled variant='primary'>Button Primary</button>
+        <button class='btn' variant='primary'>
+          <svg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'>
+            <path d="M7.08334 9.58335L3.07292 5.00002L7.08334 0.416684" stroke="currentColor" />
+          </svg>
+          <span>Button Primary</span>
+          <svg
+            width='10'
+            height='10'
+            viewBox='0 0 10 10'
+            fill='none'
+            xmlns='http://www.w3.org/2000/svg'
+            class='rotate-180'
+          >
+            <path d="M7.08334 9.58335L3.07292 5.00002L7.08334 0.416684" stroke="currentColor" />
+          </svg>
+        </button>
+      </div>
+
+      {% comment %}
+        <div class='grid grid-cols-1 border border-dashed rounded-xs gap-sm border-border-01 p-pagemargin'>
+          <button class='btn' variant='accent-02'>Button Primary Inverse</button>
+          <button class='btn' disabled variant='accent-02'>Button Primary Inverse</button>
+          <button class='btn' variant='accent-02'>
+            <svg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'>
+              <path d="M7.08334 9.58335L3.07292 5.00002L7.08334 0.416684" stroke="currentColor" />
+            </svg>
+            <span>Button Primary Inverse</span>
+            <svg
+              width='10'
+              height='10'
+              viewBox='0 0 10 10'
+              fill='none'
+              xmlns='http://www.w3.org/2000/svg'
+              class='rotate-180'
+            >
+              <path d="M7.08334 9.58335L3.07292 5.00002L7.08334 0.416684" stroke="currentColor" />
+            </svg>
+          </button>
+        </div>
+      {% endcomment %}
+
+      <div class='grid grid-cols-1 gap-sm rounded-xs border border-dashed border-border-01 p-pagemargin'>
+        <button class='btn' variant='secondary'>Secondary Button</button>
+        <button class='btn' disabled variant='secondary'>Secondary Button</button>
+        <button class='btn' variant='secondary'>
+          <svg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'>
+            <path d="M7.08334 9.58335L3.07292 5.00002L7.08334 0.416684" stroke="currentColor" />
+          </svg>
+          <span>Secondary Button</span>
+          <svg
+            width='10'
+            height='10'
+            viewBox='0 0 10 10'
+            fill='none'
+            xmlns='http://www.w3.org/2000/svg'
+            class='rotate-180'
+          >
+            <path d="M7.08334 9.58335L3.07292 5.00002L7.08334 0.416684" stroke="currentColor" />
+          </svg>
+        </button>
+      </div>
+
+      <div class='grid grid-cols-1 gap-sm rounded-xs border border-dashed border-border-01 p-pagemargin'>
+        <div class='text-center'><button class='btn' variant='tertiary'>Tertiary Button</button></div>
+        <div class='text-center'><button class='btn' disabled variant='tertiary'>Tertiary Button</button></div>
+
+        <div class='text-center'>
+          <button class='btn' variant='tertiary'>
+            <svg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'>
+              <path d="M7.08334 9.58335L3.07292 5.00002L7.08334 0.416684" stroke="currentColor" />
+            </svg>
+            <span>Tertiary Button</span>
+            <svg
+              width='10'
+              height='10'
+              viewBox='0 0 10 10'
+              fill='none'
+              xmlns='http://www.w3.org/2000/svg'
+              class='rotate-180'
+            >
+              <path d="M7.08334 9.58335L3.07292 5.00002L7.08334 0.416684" stroke="currentColor" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class='grid grid-cols-1 gap-lg px-pagemargin py-lg'>
+    <h1>Spacing</h1>
+    <div class='flex flex-col-reverse flex-wrap gap-lg sm:flex-row'>
+      <span class='spacing-token size-2xs'> 2xs </span>
+      <span class='spacing-token size-xs'> xs </span>
+      <span class='spacing-token size-sm'> sm </span>
+      <span class='spacing-token size-md'> md </span>
+      <span class='spacing-token size-lg'> lg </span>
+      <span class='spacing-token size-xl'> xl </span>
+      <span class='spacing-token size-2xl'> 2xl </span>
+      <span class='spacing-token size-3xl'> 3xl </span>
+    </div>
+  </section>
+
+  <section class='grid grid-cols-1 gap-lg px-pagemargin py-lg'>
+    <h1>Border Radius</h1>
+    <div class='flex flex-col-reverse flex-wrap gap-lg sm:flex-row'>
+      <span class='spacing-token inline-flex size-3xl items-center justify-center rounded-sm'> rounded-sm </span>
+
+      <span class='spacing-token inline-flex size-3xl items-center justify-center rounded-md'> rounded-md </span>
+
+      <span class='spacing-token inline-flex size-3xl items-center justify-center rounded-lg'> rounded-lg </span>
+
+      <span class='spacing-token inline-flex size-3xl items-center justify-center rounded-rounded'>
+        rounded-rounded
+      </span>
+    </div>
+  </section>
+
+  <section class='grid grid-cols-1 gap-lg px-pagemargin py-lg'>
+    <h1>Colors</h1>
+    <div class='flex flex-col flex-wrap justify-stretch sm:flex-row'>
+      {%- comment -%}
+        TODO: Delete these. We should't need inverse variants for colors, as these should be handled by color-schemes.
+
+        <span class='color-token bg-foreground-inverse text-black'>Foreground Inverse</span>
+        <span class='color-token bg-foreground-secondary-inverse text-black'>Foreground Secondary Inverse</span>
+        <span class='color-token bg-background-inverse text-white border border-border-01-inverse'>Background Inverse</span>
+        <span class='color-token bg-background-secondary-inverse text-white'>Background Secondary Inverse</span>
+        <span class='color-token bg-border-01-inverse text-white'>Border 01 Inverse</span>
+        <span class='color-token bg-disabled-inverse text-black'>Disabled Inverse</span>
+        <span class='color-token bg-accent-01-inverse text-white'>Accent 01 Inverse</span>
+        <span class='color-token bg-accent-02-inverse text-white'>Accent 02 Inverse</span>
+        <span class='color-token bg-border-02-inverse text-white'>Border 02 Inverse</span>
+        <span class='color-token bg-link-inverse text-black'>Link Inverse</span>
+      {%- endcomment -%}
+      <span class='color-token bg-foreground text-white'>Foreground</span>
+      <span class='color-token bg-foreground-secondary text-white'>Foreground Secondary</span>
+      <span class='color-token border border-border-01 bg-background text-black'>Background</span>
+      <span class='color-token bg-background-secondary text-black'>Background Secondary</span>
+      <span class='color-token bg-accent-01 text-white'>Accent 01</span>
+      <span class='color-token bg-accent-02 text-white'>Accent 02</span>
+      <span class='color-token bg-border-01 text-black'>Border 01</span>
+      <span class='color-token bg-border-02 text-black'>Border 02</span>
+      <span class='color-token bg-disabled text-black'>Disabled</span>
+      <span class='color-token bg-link text-white'>Link</span>
+      <span class='color-token bg-focus text-white'>Focus</span>
+      <span class='color-token bg-danger text-white'>Danger</span>
+      <span class='color-token bg-yellow text-black'>Yellow</span>
+      <span class='color-token bg-grey-300 text-black'>Grey 300</span>
+      <span class='color-token bg-blue text-white'>Blue</span>
+      <span class='color-token border border-border-01 bg-white text-black'>White</span>
+      <span class='color-token bg-grey-500 text-white'>Grey 500</span>
+      <span class='color-token bg-grey-100 text-black'>Grey 100</span>
+      <span class='color-token bg-orange text-white'>Orange</span>
+      <span class='color-token bg-grey-200 text-black'>Grey 200</span>
+      <span class='color-token bg-grey-600 text-white'>Grey 600</span>
+      <span class='color-token bg-light-blue text-black'>Light Blue</span>
+      <span class='color-token bg-black text-white'>Black</span>
+      <span class='color-token bg-grey-400 text-white'>Grey 400</span>
+    </div>
+  </section>
+
+  <section class='grid grid-cols-1 gap-lg px-pagemargin py-lg'>
+    <h1>Form Controls</h1>
+    <div class='grid grid-cols-1 gap-md md:grid-cols-4'>
+      {%- render 'form-field',
+        kind: 'input',
+        name: 'first_name',
+        id: 'first_name',
+        required: true,
+        help_text: 'Some help text here',
+        label: 'First Name'
+      -%}
+
+      {%- render 'form-field',
+        kind: 'input',
+        name: 'first_name',
+        id: 'first_name',
+        required: true,
+        help_text: 'Some help text here',
+        label: 'First Name',
+        error: true,
+        error_text: 'This field is required'
+      -%}
+
+      {%- render 'form-field',
+        kind: 'input',
+        disabled: true,
+        name: 'first_name',
+        id: 'first_name',
+        required: true,
+        value: 'John',
+        label: 'First Name'
+      -%}
+
+      {%- render 'form-field', kind: 'input', type: 'email', name: 'email', id: 'email', label: 'Email' -%}
+
+      {%- render 'form-field',
+        kind: 'textarea',
+        name: 'message',
+        id: 'message',
+        label: 'Message',
+        help_text: 'Provide a message'
+      -%}
+      {%- render 'form-field', kind: 'textarea', name: 'message', id: 'message', label: 'Message', error: true -%}
+
+      {%- render 'form-field',
+        kind: 'select',
+        name: 'countries',
+        id: 'country',
+        label: 'Countries',
+        options: country_option_tags,
+        help_text: 'Select a country'
+      -%}
+
+      {%- render 'form-field',
+        kind: 'select',
+        name: 'countries',
+        id: 'country',
+        label: 'Countries',
+        options: country_option_tags,
+        help_text: 'Select a country',
+        error: true,
+        error_text: 'Please select a country'
+      -%}
+
+      <div class='col-span-1 flex flex-wrap gap-x-sm md:col-span-4'>
+        {%- render 'form-field', kind: 'switch', id: 'switch', name: 'switch', label: 'Switch', value: 'something' -%}
+
+        {%- render 'form-field',
+          kind: 'switch',
+          id: 'switch',
+          checked: true,
+          name: 'switch',
+          label: 'Switch',
+          value: 'something',
+          help_text: 'Some help text'
+        -%}
+
+        {%- render 'form-field',
+          kind: 'switch',
+          checked: true,
+          disabled: true,
+          name: 'switchdisabled',
+          label: 'Switch',
+          value: 'something',
+          help_text: 'Some help text'
+        -%}
+      </div>
+
+      <div class='col-span-1 flex flex-wrap gap-x-sm md:col-span-4'>
+        {%- render 'form-field', kind: 'checkbox', name: 'checkbox1', label: 'Switch', value: 'something' -%}
+
+        {%- render 'form-field',
+          kind: 'checkbox',
+          checked: true,
+          name: 'checkbox2',
+          label: 'Switch',
+          value: 'something',
+          help_text: 'Some help text'
+        -%}
+
+        {%- render 'form-field',
+          kind: 'checkbox',
+          checked: true,
+          disabled: true,
+          name: 'checkbox3',
+          label: 'Switch',
+          value: 'something',
+          help_text: 'Some help text'
+        -%}
+      </div>
+
+      <div class='col-span-1 flex flex-wrap gap-x-sm md:col-span-4'>
+        {%- render 'form-field', kind: 'radio', name: 'radio1', label: 'Radio', value: 'something' -%}
+
+        {%- render 'form-field',
+          kind: 'radio',
+          checked: true,
+          name: 'radio2',
+          label: 'Radio',
+          value: 'something',
+          help_text: 'Some help text'
+        -%}
+
+        {%- render 'form-field',
+          kind: 'radio',
+          checked: true,
+          disabled: true,
+          name: 'radio3',
+          label: 'Radio',
+          value: 'something',
+          help_text: 'Some help text'
+        -%}
+      </div>
+
+      {%- render 'form-field',
+        kind: 'select',
+        name: 'countries',
+        id: 'country',
+        label: 'Custom Select',
+        options: country_option_tags,
+        help_text: 'This is a custom Select field',
+        custom_select: true
+      -%}
+
+      {%- render 'form-field',
+        kind: 'select',
+        name: 'countries',
+        id: 'country',
+        multiple: true,
+        label: 'Multiple Custom Select',
+        options: country_option_tags,
+        help_text: 'This is a custom Select field',
+        custom_select: true
+      -%}
+    </div>
+  </section>
+
+  <section class='grid grid-cols-1 gap-lg px-pagemargin py-lg'>
+    <h1>Swiper Carousels</h1>
+
+    <div>
+      {%- render '@needs-script', entries: 'basic-swiper' -%}
+      <basic-swiper>
+        <swiper-container
+          {% # Required A11Y attributes %}
+          role='region'
+          aria-roledescription='carousel'
+          aria-label='Title'
+          {% # Title to identify carousels on page, e.g. section or first block title %}
+          {% # Swiper Options %}
+          init='false'
+          navigation='true'
+          pagination='true'
+          slides-per-view='1'
+        >
+          {%- for i in (1..5) -%}
+            <swiper-slide class='grid aspect-video place-content-center items-center justify-center bg-background-secondary'>
+              <span
+                >Slide
+                {{- i -}}
+              </span>
+            </swiper-slide>
+          {%- endfor -%}
+        </swiper-container>
+      </basic-swiper>
+    </div>
+
+    <div>
+      <h2 class='mb-4'>Product Cards</h2>
+
+      <swiper-container slides-per-view='auto'>
+        {% assign product_handles_arr = 'the-collection-snowboard-liquid,the-collection-snowboard-hydrogen,the-collection-snowboard-oxygen,'
+          | split: ','
+        %}
+
+        {% for handle in product_handles_arr %}
+          {% assign display_product = all_products[handle] %}
+
+          <swiper-slide class='grid w-7/12 items-center justify-center px-2 md:w-4/12 lg:w-3/12'>
+            {% render 'product-card', product: display_product, media_aspect_ratio: 'portrait' %}
+          </swiper-slide>
+        {% endfor %}
+      </swiper-container>
+    </div>
+  </section>
+
+  <section class='grid grid-cols-1 gap-lg px-pagemargin py-lg'>
+    <h1>Icons</h1>
+    <div class='flex flex-wrap gap-lg'>
+      {%- render 'icon' with 'icon-account', class: 'text-link' -%}
+    </div>
+  </section>
+
+  <section class='grid grid-cols-1 gap-lg px-pagemargin py-lg'>
+    <h1>Dialogs / Modals</h1>
+    {%- capture modal_content -%}
+      <h1>Inner modal</h1>
+    {%- endcapture -%}
+
+    {% render 'modal-dialog', content: modal_content, id: 'modal-test' %}
+    {% render 'modal-dialog-toggle', modal_id: 'modal-test', label: 'Toggle Modal' %}
+
+    {%- capture url -%}
+      {{ all_products['the-collection-snowboard-liquid'].url }}?view=quick-shop&layout=none
+    {%- endcapture -%}
+    {% render 'modal-dialog', url: url, id: 'modal-test-url' %}
+    {% render 'modal-dialog-toggle', modal_id: 'modal-test-url', label: 'Modal with URL Content' %}
+  </section>
+
+  <section class='grid grid-cols-1 gap-lg px-pagemargin py-lg'>
+    <h1>Dynamic Product Card</h1>
+    <div>
+      <dynamic-product-card handle='the-3p-fulfilled-snowboard' template='product-card-mini'></dynamic-product-card>
+    </div>
+  </section>
+
+  <section class='grid grid-cols-1 gap-lg px-pagemargin py-lg'>
+    <h1 class='h2'>Section Injection with Live Params</h1>
+    <div class='grid max-w-xl grid-cols-1 gap-sm'>
+      {%- render 'form-field',
+        kind: 'input',
+        name: 'q',
+        value: 'the',
+        id: 'predictive-search-input',
+        required: true,
+        help_text: 'Enter something to search for',
+        label: 'Search Input'
+      -%}
+      <script>
+        document.getElementById('predictive-search-input').addEventListener('input', function () {
+          document.getElementById('predictive-search').setAttribute('params', `?q=${this.value}`)
+        })
+      </script>
+      {%- render '@needs-script', entries: 'core-inject-section' -%}
+      <section-injection
+        id='predictive-search'
+        section-name='predictive-search'
+        base-url='{{ routes.predictive_search_url }}'
+        params='?q=the'
+      ></section-injection>
+    </div>
+  </section>
+
+  <section class='grid grid-cols-1 gap-lg px-pagemargin py-lg'>
+    <h1 class='h2'>Tabs component</h1>
+    <p>
+      Typically, this component would be rendered dynamically as part of section blocks, or something similiar, and the
+      attributes could all be controlled dynamically. For the sake of the styleguide, I've hardcoded three tabs.
+    </p>
+    {% render '@needs-script', entries: 'core-tabs' %}
+    <component-tabs>
+      <div role='tablist'>
+        {% comment %}
+          {% for block in section.blocks %}
+            <button
+              type='button'
+              role='tab'
+              aria-controls='tabpanel-{{ forloop.index }}--{{ section.id }}'
+              aria-selected='{{ forloop.first }}'
+              {% if forloop.first %}
+                tabindex='0'
+              {% else %}
+                tabindex='-1'
+              {% endif %}
+              id='tab-{{ forloop.index }}--{{ section.id }}'
+            >
+              {{ block.settings.title }}
+            </button>
+          {% endfor %}
+        {% endcomment %}
+        <button
+          type='button'
+          role='tab'
+          aria-controls='tabpanel-1'
+          aria-selected='true'
+          tabindex='0'
+          id='tab-1'
+        >
+          tab 1
+        </button>
+        <button
+          type='button'
+          role='tab'
+          aria-controls='tabpanel-2'
+          aria-selected='false'
+          tabindex='-1'
+          id='tab-2'
+        >
+          tab 2
+        </button>
+
+        <button
+          type='button'
+          role='tab'
+          aria-controls='tabpanel-3'
+          aria-selected='false'
+          tabindex='-1'
+          id='tab-3'
+        >
+          tab 3
+        </button>
+      </div>
+      <div
+        id='tabpanel-1'
+        role='tabpanel'
+        tabindex='0'
+        aria-labelledby='tab-1'
+      >
+        content for tab 1
+      </div>
+      <div
+        id='tabpanel-2'
+        role='tabpanel'
+        tabindex='0'
+        aria-labelledby='tab-2'
+        aria-hidden='true'
+        class='hidden'
+      >
+        content for tab 2
+      </div>
+      <div
+        id='tabpanel-3'
+        role='tabpanel'
+        tabindex='0'
+        aria-labelledby='tab-3'
+        aria-hidden='true'
+        class='hidden'
+      >
+        content for tab 3
+      </div>
+
+      {% comment %}
+        {% for block in section.blocks %}
+          <div
+            id='tabpanel-{{ forloop.index }}--{{ section.id }}'
+            role='tabpanel'
+            tabindex='0'
+            aria-labelledby='tab-{{ forloop.index }}--{{ section.id }}'
+            {% unless forloop.first %}
+              aria-hidden='true'
+              class='hidden'
+            {% endunless %}
+          >
+            {{ block.settings.body_text }}
+          </div>
+        {% endfor %}
+      {% endcomment %}
+    </component-tabs>
+  </section>
+</div>
+
+{% schema %}
+{
+  "name": "Styleguide",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    }
+  ]
+}
+{% endschema %}

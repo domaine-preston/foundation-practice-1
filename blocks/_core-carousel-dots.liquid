@@ -1,0 +1,55 @@
+{% if block != blank %}
+  {%- capture vertical_position_classes -%}
+  {%- if block.settings.position == 'overlay' -%} absolute z-[2] bottom-sm {%- else -%} relative {%- endif -%}
+{% endcapture %}
+
+  {%- capture horizonal_alignment_classes -%}
+  {%- if block.settings.alignment == 'left' -%} left-0 justify-start {%- endif -%}
+  {%- if block.settings.alignment == 'center' -%} left-1/2 -translate-x-1/2 justify-center {%- endif -%}
+  {%- if block.settings.alignment == 'right' -%} right-0 justify-end {%- endif -%}
+{%- endcapture -%}
+
+  <div
+    position-{{ block.settings.position }}
+    class='flex px-sm {{ vertical_position_classes }} {{ horizonal_alignment_classes }}'
+    role='group'
+    aria-label='Choose slide to display'
+    data-nav-dots-wrapper
+  ></div>
+{% endif %}
+{%- schema -%}
+{
+  "name": "Carousel Dots",
+  "tag": null,
+  "settings": [
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Position",
+      "options": [
+        { "value": "above", "label": "Above" },
+        { "value": "below", "label": "Below" },
+        { "value": "overlay", "label": "overlay" }
+      ],
+      "default": "below"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carousel Dots",
+      "category": "Carousel"
+    }
+  ]
+}
+{%- endschema -%}

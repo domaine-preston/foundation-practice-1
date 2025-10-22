@@ -1,0 +1,36 @@
+{% style %}
+  {% for scheme in settings.color_schemes -%}
+    {% if forloop.index == 1 -%}
+      :root,
+    {%- endif %}
+    .color-{{ scheme.id }} {
+    {%- comment -%}
+      Overrides tokens in our design system
+      https://www.figma.com/design/JzuiYlOurUHGnActbyaWwv/-Client-Name---Pattern-Library?m=auto&node-id=12259-16468&t=HPstczv8n88ZBob0-1
+    {%- endcomment -%}
+    --color-background: {{ scheme.settings.background }};
+    --color-background-secondary: {{ scheme.settings.secondary_background }};
+    --color-foreground: {{ scheme.settings.text }};
+    --color-foreground-secondary: {{ scheme.settings.secondary_text }};
+    --color-accent-01: {{ scheme.settings.accent }};
+    --color-accent-02: {{ scheme.settings.secondary_accent }};
+    --color-border-01: {{ scheme.settings.border }};
+    --color-border-02: {{ scheme.settings.secondary_border }};
+    --color-disabled: {{ scheme.settings.disabled }};
+    --color-link: {{ scheme.settings.link }};
+
+    {%- comment -%}
+      Overrides button tokens
+      https://github.com/meetdomaine/tailwind-syrah/blob/main/BUTTON_VARIABLES.md
+    {%- endcomment -%}
+    --button-primary-bg: {{ scheme.settings.button }};
+    --button-primary-color: {{ scheme.settings.button_label }};
+    --button-primary-hover-bg: {{ scheme.settings.button_hover | default: scheme.settings.accent | default: scheme.settings.button }};
+    --button-primary-hover-color: {{ scheme.settings.button_hover_label | default: scheme.settings.button_label }};
+    --button-secondary-color: {{ scheme.settings.secondary_button_label }};
+    --button-secondary-border: {{ scheme.settings.secondary_button_label }};
+    --button-tertiary-color: {{ scheme.settings.tertiary_button_label | default: scheme.settings.secondary_button_label }};
+    --button-tertiary-hover-color: {{ scheme.settings.tertiary_button_hover_label | default: scheme.settings.tertiary_button_label | default: scheme.settings.secondary_button_label }};
+  }
+  {% endfor %}
+{% endstyle %}

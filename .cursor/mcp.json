@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "shopify-dev-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@shopify/dev-mcp@latest"
+      ],
+      "env": {
+        "LIQUID": true
+      }
+    },
+    "Figma Dev Mode MCP": {
+      "type": "sse",
+      "url": "http://127.0.0.1:3845/sse"
+    }
+  }
+}

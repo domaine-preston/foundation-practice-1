@@ -1,0 +1,148 @@
+{%- assign mod_settings = block.settings -%}
+{%- assign menu = mod_settings.menu -%}
+{%- assign links = menu.links -%}
+{%- assign request_path = request.path -%}
+{%- assign title = mod_settings.title | default: menu.title | escape -%}
+
+<!-- @@variant/split -->
+{%- comment -%}
+  Desktop variant
+{%- endcomment -%}
+<li
+  {{ block.shopify_attributes }}
+>
+  <a
+    id='HeaderMenu-{{ block.id }}'
+    href='{{ mod_settings.url }}'
+    class='p block mb-sm'
+    {% if mod_settings.link == request_path %}
+      aria-current='page'
+    {% endif %}
+  >
+    {{ title }}
+  </a>
+  {%- if links != blank and links.size > 0 -%}
+    <ul class='list-none grid gap-sm' role='list'>
+      {%- for childlink in links -%}
+        <li>
+          <a
+            id='HeaderMenu-{{ block.id }}-{{ childlink.handle }}'
+            href='{{ childlink.url }}'
+            class='{% if childlink.levels >= 1 %}p{% else %}h5{% endif %}'
+            {% if childlink.current %}
+              aria-current='page'
+            {% endif %}
+          >
+            {{ childlink.title | escape }}
+          </a>
+          {%- assign childlink_links = childlink.links -%}
+          {%- if childlink_links != blank -%}
+            <ul class='list-none' role='list'>
+              {%- for grandchildlink in childlink_links -%}
+                <li class='list-none'>
+                  <a
+                    id='HeaderMenu-{{ block.id }}-{{ childlink.handle }}-{{ grandchildlink.handle }}'
+                    href='{{ grandchildlink.url }}'
+                    class='h5'
+                    {% if grandchildlink.current %}
+                      aria-current='page'
+                    {% endif %}
+                  >
+                    {{ grandchildlink.title | escape }}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+</li>
+
+<!-- @@variant/split -->
+{%- comment -%}
+  Mobile variant
+{%- endcomment -%}
+<li class='list-none'>
+  {%- if links == blank -%}
+    <a
+      id='HeaderDrawer-{{ block.id }}'
+      href='{{ mod_settings.url }}'
+      class='h6 {% if mod_settings.link == request_path %}underline underline-offset-4{% endif %}'
+      {% if mod_settings.link == request_path %}
+        aria-current='page'
+      {% endif %}
+    >
+      {{ title }}
+    </a>
+  {%- else -%}
+    {%- assign sub_modal_id = 'Details-menu-drawer-' | append: block.id -%}
+
+    {%- capture sub_toggle_button -%}
+      <button class="h6 inline-flex items-center justify-between w-full">
+        <span>{{ title}}</span>
+        {% render 'icon' with 'icon-arrow', size: 16 %}
+      </button>
+    {%- endcapture -%}
+
+    {%- render 'modal-dialog-toggle', modal_id: sub_modal_id, toggle_element: sub_toggle_button, class: 'w-full' -%}
+
+    {%- capture sub_modal_content -%}
+      <ul
+        class='list-none px-sm grid grid-cols-1 gap-y-sm'
+        role='list'
+        tabindex='-1'
+      >
+        {%- for childlink in links -%}
+          <li class="list-none">
+            <a
+              id='HeaderDrawer-{{ block.id }}-{{ childlink.handle }}'
+              href='{{ childlink.url }}'
+              class="h6 {% if childlink.current %}underline underline-offset-4{% endif %}"
+              {% if childlink.current %}
+                aria-current='page'
+              {% endif %}
+            >
+              {{ childlink.title | escape }}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endcapture -%}
+
+    {%- render 'modal-dialog',
+      id: sub_modal_id,
+      content: sub_modal_content,
+      type: 'drawer',
+      close_on_backdrop_click: true,
+      title: title
+    -%}
+  {%- endif -%}
+</li>
+
+{% schema %}
+{
+  "name": "t:blocks.header-link_list.name",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:blocks.header-link_list.settings.title.label",
+      "info": "t:blocks.header-link_list.settings.title.info"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "default": "main-menu",
+      "label": "t:blocks.header-link_list.settings.menu.label"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.header-link_list.name"
+    }
+  ]
+}
+{% endschema %}

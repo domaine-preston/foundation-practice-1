@@ -1,0 +1,14 @@
+{%- liquid
+  assign image = block.settings.image
+  assign link = block.settings.link
+  assign sizes = block.settings.width | append: 'px'
+  assign section_index = section.index0
+  assign loading = 'eager'
+  assign preload = true
+
+  if section_index > 1
+    assign loading = 'lazy'
+    assign preload = false
+  endif
+  assign wrapper_classes = 'block'
+-%}

@@ -1,0 +1,159 @@
+{% doc %}
+  Renders a product card with image, title, price, and optional interactive features.
+  Supports hover effects, lazy loading, and quick shop functionality.
+
+  @param {object} [product] - Product Liquid object
+  @param {string} [media_aspect_ratio] - Size of the product image card. Values are "square" and "portrait". Default is "square"
+  @param {boolean} [show_secondary_image] - Show the secondary image on hover. Default: true
+  @param {boolean} [lazy_load] - Image should be lazy loaded. Default: true
+  @param {string} [shopify_attributes] - Shopify attributes
+  @param {boolean} [shoppable] - If true, the product card will be shoppable. Default: false
+  @param {string} [class] - Additional classes to apply to the product card
+
+  @example
+  {% render 'product-card', product: product, media_aspect_ratio: 'portrait', shoppable: true %}
+{% enddoc %}
+
+{%- capture sizes -%}(min-width: 1440px) 300px, (min-width: 1024px) 33vw, 50vw{%- endcapture -%}
+{%- assign image_widths = '300, 500, 750, 800' -%}
+{%- liquid
+  assign product = product
+  assign media_aspect_ratio = media_aspect_ratio | default: 'portrait'
+  assign show_secondary_image = show_secondary_image | default: true, allow_false: true
+  assign lazy_load = lazy_load | default: true, allow_false: true
+  assign shoppable = shoppable | default: false, allow_false: true
+
+  if media_aspect_ratio == 'square'
+    assign ratio = 'aspect-square'
+  elsif media_aspect_ratio == 'portrait'
+    assign ratio = 'aspect-[3/4]'
+  else
+    assign ratio = false
+  endif
+
+  if lazy_load
+    assign loading = 'lazy'
+  else
+    assign loading = 'eager'
+  endif
+
+  assign show_secondary_image = true
+  assign target_url = product.url | within: collection
+  assign featured_image = product.featured_image
+
+  assign wrapper_tag = 'div'
+
+  if shoppable and product.has_only_default_variant == false
+    assign wrapper_tag = 'main-product'
+
+    assign product_card_id = 'product-card-' | append: product.id | append: '-' | append: unique_id
+    assign product_form_id = '-product-form' | prepend: product_card_id
+    assign selected_variant = product.selected_or_first_available_variant | default: product.variants[0]
+
+    assign featured_image = selected_variant.featured_image | default: product.featured_image
+    assign target_url = selected_variant.url | within: collection
+    assign show_secondary_image = false
+  endif
+-%}
+
+{% if product %}
+  <{{ wrapper_tag }}
+    {% if shoppable %}
+      section-id='product-card'
+      id='{{ product_card_id }}'
+      product-url='{{ product.url | within: collection }}'
+    {% endif %}
+    class='w-full group relative flex flex-col overflow-hidden {{ class }}'
+
+    {% if shopify_attributes != blank -%}
+      {{ shopify_attributes }}
+    {%- endif %}
+
+    {% if unique_id != blank %}
+      replace-uid='{{ unique_id }}'
+    {% endif %}
+  >
+    <a class='block' href='{{ target_url }}' sub-section-id='main-image' data-product-url>
+      <div class='{% if ratio %}{{ ratio }}{% else %}aspect-auto{% endif %} bg-gray-200 group-hover:opacity-75 relative group rounded-md overflow-hidden'>
+        {%- render 'image',
+          image: featured_image,
+          class: 'h-full w-full rounded-xs object-cover object-center',
+          sizes: sizes,
+          width: 800,
+          widths: image_widths,
+          loading: loading
+        -%}
+
+        {%- if show_secondary_image -%}
+          {% assign hover_image = product.media | where: 'media_type', 'image' %}
+
+          {%- if hover_image[1] -%}
+            {%- render 'image',
+              image: hover_image[1],
+              class: 'h-full w-full object-cover object-center group-hover:opacity-100 group-hover:z-1 transition duration-300 opacity-0 absolute inset-0',
+              sizes: sizes,
+              widths: image_widths,
+              width: 800
+            -%}
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- render 'product-badges', product: product, container_class: 'absolute top-2 left-2 right-2 z-1' -%}
+      </div>
+    </a>
+
+    <div class='flex flex-col flex-1 pt-xs gap-y-xs'>
+      <h3 class='h6'>
+        <a href='{{ product.url | within: collection }}' data-product-url>
+          {{ product.title }}
+        </a>
+      </h3>
+
+      {%- unless shoppable -%}
+        <p class='p text-foreground-secondary'>
+          {{ product.description | strip_html | truncate: 100 }}
+        </p>
+      {%- endunless -%}
+
+      {%- unless shoppable -%}
+        {%- render '@needs-script', entries: 'core-quickshop-toggle' -%}
+        <quick-shop-toggle product-url='{{ shop.url }}{{ product.url | within: collection }}' data-product-url>
+          <button class='p' variant='tertiary'>{{ 'products.product.quickview' | t }}</button>
+        </quick-shop-toggle>
+      {%- endunless -%}
+
+      <div class='flex flex-1 flex-col gap-y-xs {% unless shoppable %} justify-end {% endunless %}'>
+        {%- if product.variants.size > 1 and shoppable == false -%}
+          <p class='p text-foreground-secondary'>{{ product.variants | size }} variants</p>
+        {%- endif -%}
+
+        {%- if shoppable -%}
+          {%- render 'price',
+            product: product,
+            show_badges: false,
+            use_variant: selected_variant,
+            price_size_class: 'p',
+            attributes: 'sub-section-id="price"'
+          -%}
+        {%- else -%}
+          {%- render 'price', product: product, show_badges: false, price_size_class: 'p' -%}
+        {%- endif -%}
+
+        {%- if shoppable -%}
+          {%- unless product.has_only_default_variant -%}
+            {%- render 'product--main__variant-picker',
+              product: product,
+              unique_id: product_card_id,
+              product_form_id: product_form_id
+            -%}
+          {%- endunless -%}
+        {%- endif -%}
+      </div>
+      {%- if shoppable -%}
+        <div class='grid items-end grid-cols-1'>
+          {%- render 'product-card__buy-buttons', product: product, product_form_id: product_form_id -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </{{ wrapper_tag }}>
+{%- endif -%}

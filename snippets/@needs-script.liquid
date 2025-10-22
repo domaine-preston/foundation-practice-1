@@ -1,0 +1,27 @@
+{%- comment -%}
+  Original implementation preserved for reference:
+  ##entry##{{- entries -}}##endentry##
+
+  Now uses vite-tag snippet while keeping @needs-script name for:
+  - Backward compatibility
+  - Support for comma-separated entries
+  - Familiar developer experience
+  - HMR support during development (see: https://github.com/barrel/shopify-vite)
+{%- endcomment -%}
+
+{%- liquid
+  assign script_entries = entries | split: ','
+  for entry in script_entries
+    assign entry_name = entry | strip
+    if entry_name contains 'core-'
+      assign entry_name = entry_name | prepend: 'core/'
+    endif
+
+    if entry_name contains '.js'
+      render 'vite-tag' with entry_name
+    else
+      assign entry_as_ts = entry_name | append: '.ts'
+      render 'vite-tag' with entry_as_ts
+    endif
+  endfor
+-%}

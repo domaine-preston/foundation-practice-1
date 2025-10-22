@@ -1,0 +1,21 @@
+{%- doc -%}
+  Displays an ingrid item for a collection
+
+  @param {object} item
+  @param {number} index
+  @param {boolean} is_mobile
+{%- enddoc -%}
+
+{% render 'collection-ingrid-item',
+  item: item,
+  is_mobile: is_mobile,
+  index: index,
+  shopify_attributes: block.shopify_attributes
+-%}
+
+{% schema %}
+{
+  "name": "Collection Ingrid Item",
+  "tag": null
+}
+{% endschema %}

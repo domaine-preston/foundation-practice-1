@@ -1,0 +1,137 @@
+/* Refer to https://tailwindcss.com/docs/theme#theme-variable-namespaces */
+@import './@colors.css';
+
+@theme {
+  --font-*: initial;
+
+  --font-roboto: 'Roboto Flex', sans-serif;
+  --font-roboto--font-variation-settings: 'wght' 100, 'wdth' 100, 'slnt' 0;
+
+  --font-roboto-medium: 'Roboto Flex', sans-serif;
+  --font-roboto-medium--font-variation-settings: 'wght' 110, 'wdth' 125,
+    'slnt' -10;
+
+  --font-roboto-bold: 'Roboto Flex', sans-serif;
+  --font-roboto-bold--font-variation-settings: 'wght' 600, 'wdth' 151, 'slnt' 0;
+
+  --font-roboto-exploded: 'Roboto Flex', sans-serif;
+  --font-roboto-exploded--font-variation-settings: 'wght' 1000, 'wdth' 151,
+    'slnt' 0;
+
+  --font-family-primary: var(--font-roboto);
+  --font-family-secondary: 'Graphik';
+  --font-family-tertiary: 'Poppins';
+  --font-family-quaternary: 'Poppins';
+
+  --radius-sm: initial;
+  --radius-lg: initial;
+  --radius-md: initial;
+
+  --max-w-*: initial;
+  --max-width-none: none;
+  --max-width-sm: 24rem;
+  --max-width-md: 28rem;
+  --max-width-lg: 32rem;
+  --max-width-xl: 36rem;
+  --max-width-2xl: 42rem;
+  --max-width-full: 100%;
+  --max-width-fit: fit-content;
+  --max-width-96: 24rem;
+
+  --leading-none: 1;
+
+  /* Button Tokens */
+  /* Read More at https://github.com/meetdomaine/tailwind-syrah/blob/main/BUTTON_VARIABLES.md */
+  --button-padding-block: 15px;
+  --button-padding-inline: 30px;
+  --button-min-width: 0;
+  --button-height: 40px;
+  --button-border-radius: 1000px;
+
+  --button-primary-bg: var(--color-foreground);
+  --button-primary-color: var(--color-foreground-secondary-inverse);
+  --button-primary-hover-bg: var(--color-accent-01);
+  --button-primary-hover-color: var(--color-foreground-secondary-inverse);
+  --button-primary-focus-color: var(--color-focus);
+  --button-primary-disabled-bg: var(--color-disabled);
+  --button-primary-disabled-color: var(--color-white);
+
+  --button-secondary-bg: transparent;
+  --button-secondary-color: var(--color-black);
+  --button-secondary-border: var(--color-black);
+  --button-secondary-border-width: 1px;
+  --button-secondary-hover-bg: var(--color-black);
+  --button-secondary-hover-color: var(--color-white);
+  --button-secondary-focus-color: var(--color-focus);
+  --button-secondary-disabled-color: var(--color-disabled);
+  --button-secondary-disabled-border: var(--color-disabled);
+
+  --button-tertiary-color: var(--color-black);
+  --button-tertiary-border: var(--color-black);
+  --button-tertiary-border-width: 0px;
+  --button-tertiary-padding-bottom: 0rem;
+  --button-tertiary-padding-bottom-desktop: 0rem;
+  --button-tertiary-hover-color: var(--color-black);
+  --button-tertiary-hover-border: var(--color-grey-300);
+  --button-tertiary-focus-color: var(--color-focus);
+  --button-tertiary-disabled-color: var(--color-disabled);
+  --button-tertiary-disabled-border: var(--color-disabled);
+
+  /* Primary Inverse Button */
+  --button-primary-inverse-bg: var(--color-accent-02);
+  --button-primary-inverse-color: var(--color-white);
+  --button-primary-inverse-hover-bg: var(--color-orange);
+  --button-primary-inverse-hover-color: var(--color-black);
+  --button-primary-inverse-focus-color: var(--color-focus);
+  --button-primary-inverse-disabled-bg: var(--color-disabled);
+  --button-primary-inverse-disabled-color: var(--color-white);
+
+  /* Secondary Inverse Button */
+  --button-secondary-inverse-bg: var(--color-black);
+  --button-secondary-inverse-color: var(--color-white);
+  --button-secondary-inverse-border: var(--color-black);
+  --button-secondary-inverse-border-width: 1px;
+  --button-secondary-inverse-hover-bg: transparent;
+  --button-secondary-inverse-hover-color: var(--color-black);
+  --button-secondary-inverse-focus-color: var(--color-focus);
+  --button-secondary-inverse-disabled-color: var(--color-disabled);
+  --button-secondary-inverse-disabled-border: var(--color-disabled);
+
+  /* Tertiary Inverse */
+  --button-tertiary-inverse-color: var(--color-black);
+  --button-tertiary-inverse-border: var(--color-black);
+  --button-tertiary-inverse-border-width: 0px;
+  --button-tertiary-inverse-padding-bottom: 0rem;
+  --button-tertiary-inverse-padding-bottom-desktop: 0rem;
+  --button-tertiary-inverse-hover-color: var(--color-black);
+  --button-tertiary-inverse-hover-border: var(--color-grey-300);
+  --button-tertiary-inverse-focus-color: var(--color-focus);
+  --button-tertiary-inverse-disabled-color: var(--color-disabled);
+  --button-tertiary-inverse-disabled-border: var(--color-disabled);
+  --button-tertiary-padding: 4px;
+  --button-tertiary-focus-radius: 2px;
+}
+
+@utility btn {
+  @apply uppercase tracking-[0.05em];
+}
+
+@layer components {
+  .btn[variant='tertiary'] {
+    @apply !p-(--button-tertiary-padding) focus:rounded-(--button-tertiary-focus-radius) focus-visible:outline-focus focus-visible:!outline-2;
+  }
+}
+
+@layer base {
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    @apply cursor-pointer;
+  }
+
+  input[type='search']::-webkit-search-decoration,
+  input[type='search']::-webkit-search-cancel-button,
+  input[type='search']::-webkit-search-results-button,
+  input[type='search']::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+  }
+}

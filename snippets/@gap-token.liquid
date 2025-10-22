@@ -1,0 +1,30 @@
+{% doc %}
+  Returns TW spacing token value based on the peovided numeric `value` parameter.
+
+  @param {number} [value] - The numeric value to convert to a spacing token
+
+  @example
+  {% render '@gap-token', value: 4 %}
+{% enddoc %}
+{%- liquid
+  case value
+    when 0
+      echo 'gap-0'
+    when 1
+      echo 'gap-2xs'
+    when 2
+      echo 'gap-xs'
+    when 3
+      echo 'gap-sm'
+    when 4
+      echo 'gap-md'
+    when 5
+      echo 'gap-lg'
+    when 6
+      echo 'gap-xl'
+    when 7
+      echo 'gap-2xl'
+    when 8
+      echo 'gap-3xl'
+  endcase
+-%}

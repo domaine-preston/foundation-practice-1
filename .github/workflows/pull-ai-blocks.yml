@@ -1,0 +1,401 @@
+# AI BLOCKS SYNC WORKFLOW
+# ------------------------
+# This workflow pulls AI-generated blocks and sections from a specified Shopify theme
+# and creates a draft PR with the changes for review
+
+# Required Github environment secrets / variables:
+# - SHOPIFY_CLI_THEME_TOKEN: Shopify CLI token
+# - SHOPIFY_FLAG_STORE: Shopify store URL
+
+# Usage:
+# 1. Run workflow manually with target theme ID
+# 2. Workflow pulls all files from the theme
+# 3. Identifies AI-generated blocks/sections (client-ai-* naming convention)
+# 4. Creates a branch with the new files
+# 5. Opens a draft PR for review
+
+name: Pull AI-Generated Blocks
+
+on:
+  workflow_dispatch:
+    inputs:
+      store:
+        description: 'Store Environment'
+        type: environment
+        required: true
+      source_theme_id:
+        description: 'Source Theme ID (where AI blocks were created)'
+        type: string
+        required: true
+      target_branch:
+        description: 'Target branch name (defaults to ai-blocks-sync-YYYY-MM-DD)'
+        type: string
+      block_filter:
+        description: 'Block name filter (e.g., "countdown" to only sync blocks containing "countdown")'
+        type: string
+      include_sections:
+        description: 'Also pull AI-generated sections'
+        type: boolean
+        default: true
+
+run-name: Pulling AI blocks from theme ${{ inputs.source_theme_id }} in ${{ inputs.store }} (@${{ github.actor }})
+
+jobs:
+  pull-ai-blocks:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.store }}
+    env:
+      SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+      SHOPIFY_FLAG_STORE: '${{ vars.SHOPIFY_FLAG_STORE }}'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 18
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1
+          bundler: 'latest'
+
+      - name: Install Shopify CLI
+        run: npm install -g @shopify/cli@3.85.4
+
+      - name: Validate theme ID
+        run: |
+          if [ -z "${{ inputs.source_theme_id }}" ]; then
+            echo "❌ ERROR: source_theme_id is required"
+            exit 1
+          fi
+
+          # Validate theme ID format (should be numeric)
+          if ! [[ "${{ inputs.source_theme_id }}" =~ ^[0-9]+$ ]]; then
+            echo "❌ ERROR: source_theme_id must be numeric"
+            exit 1
+          fi
+
+          echo "✅ Theme ID validation passed: ${{ inputs.source_theme_id }}"
+
+      - name: Create temporary directory for theme download
+        run: |
+          mkdir -p temp_theme
+          echo "📁 Created temporary directory for theme files"
+
+      - name: Pull theme files from Shopify
+        run: |
+          cd temp_theme
+          echo "🔄 Pulling theme files from theme ID: ${{ inputs.source_theme_id }}"
+          shopify theme pull --theme ${{ inputs.source_theme_id }} --nodelete
+
+      - name: Identify AI-generated files
+        id: identify_files
+        run: |
+          cd temp_theme
+
+          # Initialize arrays for tracking files
+          > ../ai_blocks_found.txt
+          > ../ai_sections_found.txt
+          > ../file_changes.md
+
+          ai_blocks_count=0
+          ai_sections_count=0
+
+          echo "🔍 Scanning for AI-generated files..."
+
+          # Look for AI-generated blocks (client-ai-* pattern)
+          if [ -d "blocks" ]; then
+            for file in blocks/client-ai-*.liquid; do
+              if [ -f "$file" ]; then
+                # Apply block filter if provided
+                if [ -n "${{ inputs.block_filter }}" ]; then
+                  if [[ "$file" == *"${{ inputs.block_filter }}"* ]]; then
+                    echo "$file" >> ../ai_blocks_found.txt
+                    ((ai_blocks_count++))
+                    echo "  📦 Found AI block: $file"
+                  fi
+                else
+                  echo "$file" >> ../ai_blocks_found.txt
+                  ((ai_blocks_count++))
+                  echo "  📦 Found AI block: $file"
+                fi
+              fi
+            done
+          fi
+
+          # Look for AI-generated sections if enabled
+          if [ "${{ inputs.include_sections }}" = "true" ] && [ -d "sections" ]; then
+            for file in sections/client-ai-*.liquid; do
+              if [ -f "$file" ]; then
+                # Apply block filter if provided (also applies to sections)
+                if [ -n "${{ inputs.block_filter }}" ]; then
+                  if [[ "$file" == *"${{ inputs.block_filter }}"* ]]; then
+                    echo "$file" >> ../ai_sections_found.txt
+                    ((ai_sections_count++))
+                    echo "  📄 Found AI section: $file"
+                  fi
+                else
+                  echo "$file" >> ../ai_sections_found.txt
+                  ((ai_sections_count++))
+                  echo "  📄 Found AI section: $file"
+                fi
+              fi
+            done
+          fi
+
+          # Set outputs for use in later steps
+          echo "ai_blocks_count=$ai_blocks_count" >> $GITHUB_OUTPUT
+          echo "ai_sections_count=$ai_sections_count" >> $GITHUB_OUTPUT
+          echo "total_files=$((ai_blocks_count + ai_sections_count))" >> $GITHUB_OUTPUT
+
+          if [ $((ai_blocks_count + ai_sections_count)) -eq 0 ]; then
+            echo "⚠️ No AI-generated files found matching the criteria"
+            if [ -n "${{ inputs.block_filter }}" ]; then
+              echo "Filter applied: ${{ inputs.block_filter }}"
+            fi
+            echo "Expected naming convention: client-ai-*.liquid"
+          else
+            echo "✅ Found $ai_blocks_count AI blocks and $ai_sections_count AI sections"
+          fi
+
+      - name: Exit if no AI files found
+        if: steps.identify_files.outputs.total_files == '0'
+        run: |
+          echo "❌ No AI-generated files found. Exiting workflow."
+          echo "💡 Ensure AI-generated blocks follow the naming convention: client-ai-*.liquid"
+          exit 1
+
+      - name: Copy AI files to repository
+        run: |
+          echo "📋 Copying AI-generated files to repository..."
+
+          # Copy AI blocks
+          if [ -s ai_blocks_found.txt ]; then
+            while IFS= read -r file; do
+              # Remove the temp_theme/ prefix and copy to the right location
+              target_file=${file#temp_theme/}
+              cp "temp_theme/$file" "$target_file"
+              echo "  ✅ Copied: $target_file"
+            done < ai_blocks_found.txt
+          fi
+
+          # Copy AI sections
+          if [ -s ai_sections_found.txt ]; then
+            while IFS= read -r file; do
+              # Remove the temp_theme/ prefix and copy to the right location
+              target_file=${file#temp_theme/}
+              cp "temp_theme/$file" "$target_file"
+              echo "  ✅ Copied: $target_file"
+            done < ai_sections_found.txt
+          fi
+
+      - name: Generate AI file documentation
+        id: generate_docs
+        run: |
+          timestamp=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+          # Create documentation for each AI file
+          > ai_files_documentation.md
+
+          echo "# AI-Generated Files Documentation" >> ai_files_documentation.md
+          echo "" >> ai_files_documentation.md
+          echo "**Generated:** $timestamp" >> ai_files_documentation.md
+          echo "**Source Theme ID:** ${{ inputs.source_theme_id }}" >> ai_files_documentation.md
+          echo "**Store:** ${{ inputs.store }}" >> ai_files_documentation.md
+          echo "" >> ai_files_documentation.md
+
+          if [ -s ai_blocks_found.txt ]; then
+            echo "## AI Blocks (${{ steps.identify_files.outputs.ai_blocks_count }} found)" >> ai_files_documentation.md
+            echo "" >> ai_files_documentation.md
+            while IFS= read -r file; do
+              filename=$(basename "$file")
+              echo "### $filename" >> ai_files_documentation.md
+              echo "" >> ai_files_documentation.md
+              echo "- **Type:** Block" >> ai_files_documentation.md
+              echo "- **Source Theme:** ${{ inputs.source_theme_id }}" >> ai_files_documentation.md
+              echo "- **File Path:** \`${file#temp_theme/}\`" >> ai_files_documentation.md
+              echo "- **Synced:** $timestamp" >> ai_files_documentation.md
+              echo "" >> ai_files_documentation.md
+              echo "#### Client Responsibilities" >> ai_files_documentation.md
+              echo "- [ ] Accessibility compliance (WCAG 2.2)" >> ai_files_documentation.md
+              echo "- [ ] Performance testing (Core Web Vitals)" >> ai_files_documentation.md
+              echo "- [ ] Cross-browser compatibility" >> ai_files_documentation.md
+              echo "- [ ] Mobile responsiveness" >> ai_files_documentation.md
+              echo "- [ ] Security review" >> ai_files_documentation.md
+              echo "" >> ai_files_documentation.md
+            done < ai_blocks_found.txt
+          fi
+
+          if [ -s ai_sections_found.txt ]; then
+            echo "## AI Sections (${{ steps.identify_files.outputs.ai_sections_count }} found)" >> ai_files_documentation.md
+            echo "" >> ai_files_documentation.md
+            while IFS= read -r file; do
+              filename=$(basename "$file")
+              echo "### $filename" >> ai_files_documentation.md
+              echo "" >> ai_files_documentation.md
+              echo "- **Type:** Section" >> ai_files_documentation.md
+              echo "- **Source Theme:** ${{ inputs.source_theme_id }}" >> ai_files_documentation.md
+              echo "- **File Path:** \`${file#temp_theme/}\`" >> ai_files_documentation.md
+              echo "- **Synced:** $timestamp" >> ai_files_documentation.md
+              echo "" >> ai_files_documentation.md
+              echo "#### Client Responsibilities" >> ai_files_documentation.md
+              echo "- [ ] Accessibility compliance (WCAG 2.2)" >> ai_files_documentation.md
+              echo "- [ ] Performance testing (Core Web Vitals)" >> ai_files_documentation.md
+              echo "- [ ] Cross-browser compatibility" >> ai_files_documentation.md
+              echo "- [ ] Mobile responsiveness" >> ai_files_documentation.md
+              echo "- [ ] Security review" >> ai_files_documentation.md
+              echo "" >> ai_files_documentation.md
+            done < ai_sections_found.txt
+          fi
+
+      - name: Prepare branch name
+        id: branch_name
+        run: |
+          if [ -n "${{ inputs.target_branch }}" ]; then
+            branch_name="${{ inputs.target_branch }}"
+          else
+            date_suffix=$(date +"%Y-%m-%d")
+            branch_name="ai-blocks-sync-$date_suffix"
+          fi
+
+          echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
+          echo "🌟 Target branch: $branch_name"
+
+      - name: Prepare commit and PR content
+        id: prepare_content
+        run: |
+          total_files=${{ steps.identify_files.outputs.total_files }}
+          blocks_count=${{ steps.identify_files.outputs.ai_blocks_count }}
+          sections_count=${{ steps.identify_files.outputs.ai_sections_count }}
+
+          # Create commit message
+          commit_msg="feat: sync AI-generated blocks from theme ${{ inputs.source_theme_id }}"
+          if [ $blocks_count -gt 0 ] && [ $sections_count -gt 0 ]; then
+            commit_msg="$commit_msg
+
+          - Added $blocks_count AI blocks
+          - Added $sections_count AI sections"
+          elif [ $blocks_count -gt 0 ]; then
+            commit_msg="$commit_msg
+
+          - Added $blocks_count AI blocks"
+          elif [ $sections_count -gt 0 ]; then
+            commit_msg="$commit_msg
+
+          - Added $sections_count AI sections"
+          fi
+
+          # Create PR title
+          pr_title="🤖 AI Blocks Sync: $total_files files from theme ${{ inputs.source_theme_id }}"
+
+          # Create PR body
+          {
+            echo "## 🤖 AI-Generated Blocks Sync"
+            echo ""
+            echo "This PR contains AI-generated blocks and sections pulled from Shopify theme **${{ inputs.source_theme_id }}** in the **${{ inputs.store }}** store."
+            echo ""
+            echo "### 📊 Summary"
+            echo "- **AI Blocks:** $blocks_count"
+            echo "- **AI Sections:** $sections_count"
+            echo "- **Total Files:** $total_files"
+            echo "- **Source Theme ID:** ${{ inputs.source_theme_id }}"
+            echo "- **Store Environment:** ${{ inputs.store }}"
+            if [ -n "${{ inputs.block_filter }}" ]; then
+              echo "- **Filter Applied:** \`${{ inputs.block_filter }}\`"
+            fi
+            echo ""
+            echo "### ⚠️ Important: Client Responsibility"
+            echo ""
+            echo "**These AI-generated files are client customizations and the client is responsible for:**"
+            echo ""
+            echo "- ✅ **Accessibility Compliance** (WCAG 2.2 Level AA)"
+            echo "- ✅ **Performance Optimization** (Core Web Vitals)"
+            echo "- ✅ **Cross-browser Compatibility**"
+            echo "- ✅ **Mobile Responsiveness**"
+            echo "- ✅ **Security Review**"
+            echo "- ✅ **Ongoing Maintenance**"
+            echo ""
+            echo "### 🔍 Files Added"
+            echo ""
+            if [ $blocks_count -gt 0 ]; then
+              echo "#### Blocks"
+              while IFS= read -r file; do
+                filename=$(basename "$file")
+                echo "- \`blocks/$filename\`"
+              done < ai_blocks_found.txt
+              echo ""
+            fi
+            if [ $sections_count -gt 0 ]; then
+              echo "#### Sections"
+              while IFS= read -r file; do
+                filename=$(basename "$file")
+                echo "- \`sections/$filename\`"
+              done < ai_sections_found.txt
+              echo ""
+            fi
+            echo "### 📋 Next Steps"
+            echo ""
+            echo "1. **Review** each file for code quality and functionality"
+            echo "2. **Test** accessibility compliance using tools like WAVE or axe"
+            echo "3. **Validate** performance impact on Core Web Vitals"
+            echo "4. **Test** across all target browsers and devices"
+            echo "5. **Update** documentation with any specific requirements"
+            echo ""
+            echo "### 📚 Documentation"
+            echo ""
+            echo "See the generated documentation file for detailed information about each AI-generated file."
+            echo ""
+            echo "---"
+            echo ""
+            echo "*This PR was automatically generated by the AI Blocks Sync workflow.*"
+          } > pr_body.md
+
+          # Set outputs
+          {
+            echo "commit_message<<EOF"
+            echo "$commit_msg"
+            echo "EOF"
+            echo "pr_title<<EOF"
+            echo "$pr_title"
+            echo "EOF"
+            echo "pr_body<<EOF"
+            cat pr_body.md
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Cleanup temp files
+        run: |
+          rm -rf temp_theme
+          rm -f ai_blocks_found.txt ai_sections_found.txt pr_body.md
+          echo "🧹 Cleaned up temporary files"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: ${{ steps.prepare_content.outputs.commit_message }}
+          title: ${{ steps.prepare_content.outputs.pr_title }}
+          body: ${{ steps.prepare_content.outputs.pr_body }}
+          branch: ${{ steps.branch_name.outputs.branch_name }}
+          draft: true
+          add-paths: |
+            blocks/client-ai-*.liquid
+            sections/client-ai-*.liquid
+            ai_files_documentation.md
+
+      - name: Summary
+        run: |
+          echo "🎉 AI Blocks Sync completed successfully!"
+          echo ""
+          echo "📊 Summary:"
+          echo "  - AI Blocks: ${{ steps.identify_files.outputs.ai_blocks_count }}"
+          echo "  - AI Sections: ${{ steps.identify_files.outputs.ai_sections_count }}"
+          echo "  - Total Files: ${{ steps.identify_files.outputs.total_files }}"
+          echo "  - Target Branch: ${{ steps.branch_name.outputs.branch_name }}"
+          echo ""
+          echo "📝 A draft PR has been created for review."
+          echo "🔍 Please review all files for accessibility, performance, and security compliance."

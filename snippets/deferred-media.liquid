@@ -1,0 +1,152 @@
+{% doc %}
+  Renders a deferred media element that loads a video when the user interacts with the poster image.
+
+  @param {string} [title] - The title for the video
+  @param {object} [cover_image] - The poster image for the video (if not provided, uses video.preview_image)
+  @param {object} video - The video object for the video or settings from a Section Input of type 'video_url'
+  @param {object} [video_mobile] - The video object for the mobile version of the video (defaults to video)
+  @param {boolean} [loop] - Whether the video should loop (default: false)
+  @param {boolean} [autoplay] - Whether the video should autoplay (default: true)
+  @param {boolean} [muted] - Whether the video should be muted (default: false)
+  @param {boolean} [controls] - Whether to show video controls (default: true)
+  @param {string} [object_fit] - CSS object-fit property for the video (default: 'object-contain')
+  @param {string} [class] - CSS classes for the container (default: 'relative w-full aspect-[16/9]')
+  @param {string} [poster_loading] - Loading behavior for poster image (default: 'lazy')
+  @param {string} [shopify_attributes] - Additional Shopify attributes to add to the <deferred-media> element
+  @param {string} [video_alt] - The alt text for the video (default: 'sections.video.load_video' | t: description: title | escape)
+
+  @example
+  {% render 'deferred-media', video: video, title: 'Product Demo', autoplay: false, controls: true %}
+{% enddoc %}
+
+{%- liquid
+  assign video_title = title
+  assign video_id = video.id
+  assign video_alt = video_alt | default: 'sections.video.load_video' | t: description: video_title | escape
+  assign poster = cover_image | default: video.preview_image
+  assign autoplay = autoplay | default: true, allow_false: true
+  assign loop = loop | default: false, allow_false: true
+  assign muted = muted | default: false, allow_false: true
+  assign controls = controls | default: true, allow_false: true
+  assign object_fit = object_fit | default: 'object-contain'
+  assign class = class | default: 'relative w-full aspect-[16/9]'
+  assign poster_loading = poster_loading | default: 'lazy'
+  assign video_mobile = video_mobile | default: video
+
+  if video.media_type == 'external_video'
+    assign video_id = video.external_id
+  endif
+  assign media_type = video.media_type | default: 'external_video'
+  assign host = video.host | default: video.type
+-%}
+
+{%- if video_id != blank -%}
+  {%- render '@needs-script', entries: 'core-deferred-media' -%}
+  <deferred-media
+    class='{{ class }}'
+    data-media-id='{{ video_id }}'
+    media-type='{{ media_type }}'
+    host='{{ host }}'
+    loop='{{ loop }}'
+    autoplay='{{ autoplay }}'
+    controls='{{ controls }}'
+    muted='{{ muted }}'
+    {% if shopify_attributes %}
+      {{ shopify_attributes }}
+    {% endif %}
+  >
+    {%- unless media_type == 'video' and autoplay == true and loop and controls == false -%}
+      <button
+        id='Deferred-Poster-Modal-{{ video_id }}'
+        type='button'
+        aria-label='{{ video_alt }}'
+        class='absolute inset-0 flex h-full w-full items-center justify-center'
+      >
+        {%- if poster != null -%}
+          {%- render 'image',
+            width: '1440',
+            image: poster,
+            sizes: '50vw',
+            alt: video_alt,
+            class: 'absolute inset-0 w-full h-full',
+            loading: poster_loading,
+            format: 'pjpg'
+          -%}
+        {%- else -%}
+          {{ 'hero-apparel-3' | placeholder_svg_tag: 'absolute inset-0 w-full h-full' }}
+        {%- endif -%}
+        <span class='z-10 inline-flex size-10 items-center justify-center rounded-full bg-background text-foreground drop-shadow-sm'>
+          {%- render 'icon', icon: 'icon-play', size: 16 -%}
+        </span>
+      </button>
+    {%- endunless -%}
+    <template>
+      {%- if media_type == 'external_video' -%}
+        {%- liquid
+          assign loop_string = ''
+          if loop
+            assign loop_string = '&loop=1&playlist=' | append: video_id
+          endif
+        -%}
+        {%- if host == 'youtube' -%}
+          {% comment %} Forcing Autoplay so video plays automatically when the custom play button is clicked {% endcomment %}
+          <iframe
+            src='https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1&controls={{ controls }}&rel=0&autoplay=1{{ loop_string }}'
+            class='js-youtube absolute inset-0 h-full w-full'
+            allow='autoplay; encrypted-media'
+            allowfullscreen
+            title='{{ video_title | escape }}'
+          ></iframe>
+        {%- elsif host == 'vimeo' -%}
+          {% comment %} Forcing Autoplay so video plays automatically when the custom play button is clicked {% endcomment %}
+          <iframe
+            src='https://player.vimeo.com/video/{{ video_id }}?autoplay=1&loop={{ loop }}'
+            class='js-vimeo absolute inset-0 h-full w-full'
+            allow='autoplay; encrypted-media'
+            allowfullscreen
+            title='{{ video_title | escape }}'
+          ></iframe>
+        {%- endif -%}
+      {%- else -%}
+        {%- assign video_class = 'absolute w-full h-full inset-0' | append: ' ' | append: object_fit -%}
+        <video
+          class='{{ video_class }}'
+          poster='{{ poster | image_url: width: 1440, format: 'pjpg' }}'
+          playsinline
+          {% if controls %}
+            controls
+          {% endif %}
+
+          {% if autoplay %}
+            autoplay
+          {% endif %}
+
+          {% if loop %}
+            loop
+          {% endif %}
+
+          {% if muted %}
+            muted
+          {% endif %}
+        >
+          {% # theme-check-disable RemoteAsset %}
+          {%- for source in video_mobile.sources -%}
+            <source
+              src='{{ source.url }}'
+              type='{{ source.mime_type }}'
+              media='(max-width: 640px)'
+            >
+          {%- endfor -%}
+          {%- for source in video.sources -%}
+            <source
+              src='{{ source.url }}'
+              type='{{ source.mime_type }}'
+              media='(min-width: 641px)'
+            >
+          {%- endfor -%}
+          {% # theme-check-enable RemoteAsset %}
+        </video>
+      {%- endif -%}
+    </template>
+  </deferred-media>
+{%- endif -%}

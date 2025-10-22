@@ -1,0 +1,11 @@
+{% doc %}
+  Renders preload tags for a list of image sizes to improve performance by preloading images.
+
+  @param {string} [sizes] - A comma-separated list of image sizes to preload. Defaults to '300, 600, 800, 1000, 1200'.
+  @param {image} image - The image to preload.
+{% enddoc %}
+
+{%- assign sizes = sizes | default: '300, 600, 800, 1000, 1200' | split: ',' -%}
+{%- for image_size in sizes -%}
+  {{ image | image_url: width: image_size | preload_tag: as: 'image' }}
+{%- endfor -%}

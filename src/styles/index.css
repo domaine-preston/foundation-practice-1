@@ -1,0 +1,379 @@
+@import 'tailwindcss';
+@source inline("flex-col md:flex-row");
+
+@config '../../tailwind.config.ts';
+@source '../src/**/*.{js,ts,jsx,tsx}';
+@source '../../{layout,sections,snippets,templates,blocks}/**/*.{liquid,js,ts}';
+
+/* Exclude anything with "styleguide" in the filename */
+@source not '../../{layout,sections,snippets,templates,blocks}/**/*styleguide*.{liquid,css,js,ts}';
+
+@import './@theme.css';
+
+@layer base {
+  body {
+    @apply pr-(--scrollbar-width);
+    @apply text-foreground;
+  }
+
+  .announcement-bar-wrapper {
+    @apply -mr-(--scrollbar-width) transition-[margin];
+  }
+
+  .clip-auto {
+    clip: auto;
+  }
+
+  .skip-to-content-link:focus {
+    @apply absolute z-[9999] block h-auto w-auto overflow-auto;
+  }
+
+  details > summary {
+    list-style: none;
+  }
+
+  details > summary::marker, /* Latest Chrome, Edge, Firefox */
+  details > summary::-webkit-details-marker /* Safari */ {
+    display: none;
+  }
+
+  .remove-arrow::-webkit-inner-spin-button,
+  .remove-arrow::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .remove-arrow {
+    -moz-appearance: textfield;
+  }
+
+  html:has(modal-dialog[open]) {
+    @apply overflow-hidden;
+  }
+
+  swiper-container {
+    @apply text-foreground;
+    --swiper-theme-color: currentColor;
+    --swiper-pagination-bottom: 0;
+  }
+
+  accessible-link {
+    @apply cursor-pointer;
+  }
+}
+
+@layer components {
+  .rte > *:first-child {
+    @apply mt-0;
+  }
+
+  .rte > *:last-child {
+    @apply mb-0;
+  }
+
+  .rte table {
+    @apply table-fixed;
+  }
+
+  .rte img {
+    @apply mb-4 h-auto max-w-full rounded-sm border;
+  }
+
+  .rte > ul > li,
+  .rte > ol > li {
+    @apply list-outside last:mb-0;
+  }
+
+  .rte a {
+    @apply underline hover:decoration-2;
+  }
+
+  .rte blockquote {
+    @apply inline-flex;
+  }
+
+  .rte blockquote > * {
+    @apply -my-2;
+  }
+
+  @media sm {
+    .order-mobile-table thead,
+    .order-mobile-table th,
+    .order-mobile-table tfoot td:first-of-type {
+      @apply hidden;
+    }
+
+    .order-mobile-table td {
+      @apply flex text-right;
+    }
+
+    .order-mobile-table tbody tr {
+      @apply border-t py-4;
+    }
+
+    .order-mobile-table td[data-label]:before {
+      @apply text-body grow-1 pr-8 text-left uppercase;
+      content: attr(data-label);
+    }
+
+    .order-mobile-table td:first-of-type {
+      @apply flex items-center;
+    }
+
+    .order-mobile-table tr {
+      @apply flex w-full flex-col justify-start;
+    }
+  }
+
+  .rte em,
+  .rte i {
+    font-style: italic;
+  }
+
+  .rte strong {
+    font-weight: bold;
+  }
+
+  .rte table {
+    @apply w-full;
+  }
+
+  .rte table th {
+    @apply border-collapse border font-bold;
+  }
+
+  .rte table td {
+    @apply border-collapse border p-2;
+  }
+
+  @screen sm {
+    .rte table td {
+      @apply px-5;
+    }
+  }
+
+  .rte iframe {
+    @apply max-w-full;
+  }
+
+  .rte ol,
+  .rte ul {
+    @apply p ml-3 w-fit pl-2;
+  }
+
+  .rte ol li,
+  .rte ul li {
+    @apply mt-2;
+  }
+
+  .rte ol {
+    list-style-type: decimal;
+  }
+
+  .rte ol ul {
+    list-style-type: disc;
+  }
+
+  .rte ul {
+    list-style-type: disc;
+  }
+
+  .rte ul li li {
+    margin-left: 2.5em;
+    list-style: circle;
+  }
+
+  .rte ul li li li {
+    list-style: square;
+  }
+
+  .rte h1 {
+    @apply h1 mb-sm;
+  }
+
+  .rte h2 {
+    @apply h2 mb-sm;
+  }
+
+  .rte h3 {
+    @apply h3 mb-sm;
+  }
+
+  .rte h4 {
+    @apply h4 mb-sm;
+  }
+
+  .rte h5 {
+    @apply h5 mb-sm;
+  }
+
+  .rte h6 {
+    @apply h6 mb-sm;
+  }
+
+  .rte p {
+    @apply mb-sm;
+  }
+
+  .rte > ul,
+  .rte > ol,
+  .rte > div > ul,
+  .rte > div > ol {
+    @apply mb-sm;
+  }
+
+  .text-block.h1 > * {
+    @apply h1;
+  }
+
+  .text-block.h2 > * {
+    @apply h2;
+  }
+
+  .text-block.h3 > * {
+    @apply h3;
+  }
+
+  .text-block.h4 > * {
+    @apply h4;
+  }
+
+  .text-block.h5 > * {
+    @apply h5;
+  }
+
+  .text-block.h6 > * {
+    @apply h6;
+  }
+
+  .text-block.p > * {
+    @apply p;
+  }
+
+  /* Pandectes GDPR Compliance */
+  .cc-window.cc-floating {
+    @apply !bg-background-secondary/60 !rounded-md !backdrop-blur-xs;
+  }
+
+  .cc-btn {
+    @apply !text-body !bg-accent-01 !rounded-forms-radius hover:!bg-accent-02 hover:!text-foreground;
+  }
+
+  .cc-message {
+    @apply !text-body;
+  }
+
+  core-carousel {
+    @apply relative block w-full;
+  }
+
+  core-carousel[data-navigation] {
+    @apply pb-sm;
+  }
+
+  .core-carousel-slides {
+    @apply flex w-full snap-x snap-mandatory gap-(--core-carousel-gap) overflow-auto;
+    scrollbar-width: none; /* for Firefox and latest Chromium */
+  }
+
+  .core-carousel-slides::-webkit-scrollbar {
+    display: none; /* for Safari and legacy Chromium */
+  }
+
+  .core-carousel-slide {
+    @apply relative w-[calc(var(--core-carousel-slide-width)-var(--core-carousel-slide-gap-per-slide))] max-w-full flex-[0_0_auto] snap-center;
+  }
+
+  core-carousel[data-items-to-show] .core-carousel-slide {
+    @apply snap-start;
+  }
+
+  core-carousel[data-multi-scroll] .core-carousel-slide {
+    @apply snap-align-none;
+  }
+
+  /* NOTE this ensures that when a carousel is meant to scroll more than one slide at once, it snaps to the correct slide. You may need to adjust the 4n+1 if you are not scrolling by 4 slides at a time */
+  core-carousel[data-multi-scroll]
+    .core-carousel-slide:nth-of-type(4n + 1)
+    .core-carousel-slide:nth-of-type(4n + 1) {
+    @apply md:snap-start md:snap-always;
+  }
+
+  .core-carousel-slides.smooth-scroll {
+    @apply scroll-smooth;
+  }
+
+  [data-nav-dots-wrapper] button {
+    @apply m-xs h-sm w-sm cursor-pointer appearance-none rounded-full border-0 bg-(--button-primary-color) p-0;
+  }
+
+  [data-nav-dots-wrapper] button:focus-visible {
+    @apply ring-2 ring-(--button-primary-bg);
+  }
+
+  [data-nav-dots-wrapper] button[aria-disabled='true'] {
+    @apply bg-(--button-primary-bg);
+  }
+
+  .core-carousel-progress {
+    @apply -bottom-sm absolute right-0 left-0 z-[2] flex h-(--progress-height,4px) w-full bg-(--button-primary-color);
+  }
+
+  .core-carousel-progress-thumb {
+    @apply h-full w-(--scroll) bg-(--button-primary-bg) transition-[width] duration-50 ease-linear;
+  }
+
+  .core-carousel-button {
+    @apply z-[2] flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-200 ease-in-out;
+  }
+
+  /* In a carousel that loops - ie, usually a full page hero - the prev/next buttons overlay the slides. */
+  /* In a carousel that doesn't loop - ie, a product grid - the prev/next buttons are above the slides */
+  core-carousel[data-loop] .core-carousel-button {
+    @apply absolute top-1/2 -translate-y-1/2;
+  }
+
+  .core-carousel-button.disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+
+  core-carousel[data-loop] .core-carousel-button-next {
+    @apply right-pagemargin;
+  }
+
+  core-carousel[data-is-mobile-only] [data-nav-dots-wrapper],
+  core-carousel[data-is-mobile-only] .core-carousel-progress,
+  core-carousel[data-is-mobile-only] .core-carousel-button {
+    @apply md:hidden;
+  }
+
+  core-carousel[data-is-desktop-only] [data-nav-dots-wrapper],
+  core-carousel[data-is-desktop-only] .core-carousel-progress,
+  core-carousel[data-is-desktop-only] .core-carousel-button {
+    @apply hidden md:flex;
+  }
+
+  core-carousel[data-is-desktop-only] .core-carousel-slides {
+    @apply max-[767px]:grid max-[767px]:grid-cols-2;
+  }
+
+  core-carousel[data-is-desktop-only] .core-carousel-slide {
+    @apply max-[767px]:w-full;
+  }
+
+  core-carousel[data-is-mobile-only] .core-carousel-slides {
+    @apply md:grid md:grid-cols-4;
+  }
+
+  core-carousel[data-is-mobile-only] .core-carousel-slide {
+    @apply md:w-full;
+  }
+}
+
+.locale-selectors select {
+  @apply h-5 border-transparent p-0;
+}
+
+.locale-selectors div {
+  @apply h-5;
+}

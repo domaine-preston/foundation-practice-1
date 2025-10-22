@@ -1,0 +1,129 @@
+{%- liquid
+  assign category_handle = block.settings.faq_section | handle
+  assign category = block.settings.faq_section
+
+  if request.visual_preview_mode
+    assign first_faq_section = metaobjects.faq_section.values | first
+    assign category_handle = first_faq_section.handle
+    assign category = first_faq_section
+  endif
+-%}
+
+{%- capture spacing_token -%}
+  {%- render '@spacing-padding', spacing_settings: block.settings, default_token: 'p-sm' -%}
+{%- endcapture -%}
+
+<div class='{{ spacing_token }} w-full' {{ block.shopify_attributes }}>
+  <div id='{{ category_handle }}'>
+    {%- content_for 'block', type: 'core-heading', id: 'title' -%}
+  </div>
+
+  <div class='mt-sm space-y-sm'>
+    {%- for item in category.items.value -%}
+      {%- content_for 'block', type: 'core-faq-item', id: 'faq-item', closest.metaobject.faq_item: item -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.faq.blocks.category.name",
+  "tag": null,
+  "settings": [
+    {
+      "type": "metaobject",
+      "id": "faq_section",
+      "metaobject_type": "faq_section",
+      "label": "t:sections.faq.blocks.category.settings.faq_section"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_custom_spacing",
+      "label": "t:spacing.use_custom_spacing.label",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_top",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline_end",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_inline_end",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_bottom",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline_start",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_inline_start",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.faq.blocks.category.name",
+      "category": "t:preset_categories.core-basic",
+      "blocks": {
+        "title": {
+          "type": "core-heading",
+          "static": true,
+          "settings": {
+            "heading_style": "h6",
+            "text": "<p>FAQ Category</p>",
+            "use_custom_spacing": true,
+            "padding_top": 0,
+            "padding_inline_end": 0,
+            "padding_bottom": 0,
+            "padding_inline_start": 0
+          }
+        },
+        "faq-item": {
+          "type": "core-faq-item",
+          "static": true,
+          "settings": {
+            "faq_item": "{{ closest.metaobject.faq_item }}"
+          },
+          "blocks": {
+            "accordion": {
+              "type": "core-accordion",
+              "static": true,
+              "settings": {
+                "title": "{{ closest.metaobject.faq_item.question.value  }}",
+                "content": "{{ closest.metaobject.faq_item.answer | metafield_tag }}"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
+{% endschema %}

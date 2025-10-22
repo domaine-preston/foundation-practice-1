@@ -1,0 +1,167 @@
+<div data-carousel-slide class='core-carousel-slide overflow-hidden relative' {{ block.shopify_attributes }}>
+  {% content_for 'blocks' %}
+</div>
+{% schema %}
+{
+  "name": "t:names.core-carousel-slide",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "core-group"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.core-carousel-empty-slide",
+      "category": "t:preset_categories.core-basic"
+    },
+    {
+      "name": "t:names.core-carousel-image-slide",
+      "category": "t:preset_categories.core-basic",
+      "blocks": {
+        "core_group_Y7PnzB": {
+          "type": "core-group",
+          "name": "Media",
+          "settings": {
+            "overlay_container": true,
+            "overlay_on_desktop": false,
+            "overlay_on_mobile": false,
+            "content_direction": "flex-col",
+            "text_alignment": "text-start",
+            "vertical_on_mobile": true,
+            "horizontal_alignment": "justify-start",
+            "vertical_alignment": "items-center",
+            "align_baseline": false,
+            "horizontal_alignment_flex_direction_column": "items-start",
+            "vertical_alignment_flex_direction_column": "justify-center",
+            "gap": 2,
+            "padding_top": 0,
+            "padding_inline_end": 0,
+            "padding_bottom": 0,
+            "padding_inline_start": 0,
+            "use_custom_width": false,
+            "custom_width": 100,
+            "custom_width_mobile": 100
+          },
+          "blocks": {
+            "core_image_wDceap": {
+              "type": "core-image",
+              "name": "t:names.core-image",
+              "settings": {
+                "desktop_image": "shopify://shop_images/5c8f7e13aaa6b9c71fd6939aebe5d0a4398d0017.png",
+                "link": "",
+                "image_ratio": "aspect-video",
+                "image_fit": "cover",
+                "use_custom_spacing": false,
+                "padding_top": 0,
+                "padding_inline_end": 0,
+                "padding_bottom": 0,
+                "padding_inline_start": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": ["core_image_wDceap"]
+        },
+        "core_group_GGjwjR": {
+          "type": "core-group",
+          "name": "Content",
+          "settings": {
+            "overlay_container": false,
+            "overlay_on_desktop": true,
+            "overlay_on_mobile": false,
+            "content_direction": "flex-col",
+            "text_alignment": "text-start",
+            "vertical_on_mobile": true,
+            "horizontal_alignment": "justify-start",
+            "vertical_alignment": "items-center",
+            "align_baseline": false,
+            "horizontal_alignment_flex_direction_column": "items-start",
+            "vertical_alignment_flex_direction_column": "justify-center",
+            "gap": 0,
+            "padding_top": 4,
+            "padding_inline_end": 4,
+            "padding_bottom": 4,
+            "padding_inline_start": 4,
+            "use_custom_width": false,
+            "custom_width": 100,
+            "custom_width_mobile": 100
+          },
+          "blocks": {
+            "core_group_mPwBph": {
+              "type": "core-group",
+              "name": "t:names.core-group",
+              "settings": {
+                "overlay_container": true,
+                "overlay_on_desktop": false,
+                "overlay_on_mobile": false,
+                "content_direction": "flex-col",
+                "text_alignment": "text-start",
+                "vertical_on_mobile": true,
+                "horizontal_alignment": "justify-start",
+                "vertical_alignment": "items-center",
+                "align_baseline": false,
+                "horizontal_alignment_flex_direction_column": "items-start",
+                "vertical_alignment_flex_direction_column": "justify-center",
+                "gap": 1,
+                "padding_top": 0,
+                "padding_inline_end": 0,
+                "padding_bottom": 0,
+                "padding_inline_start": 0,
+                "use_custom_width": true,
+                "custom_width": 31,
+                "custom_width_mobile": 100
+              },
+              "blocks": {
+                "core_heading_mnBMLU": {
+                  "type": "core-heading",
+                  "name": "t:names.core-heading",
+                  "settings": {
+                    "heading_style": "h1",
+                    "text": "<p>Find your natural glow.</p>",
+                    "use_custom_spacing": true,
+                    "padding_top": 0,
+                    "padding_inline_end": 0,
+                    "padding_bottom": 0,
+                    "padding_inline_start": 0
+                  },
+                  "blocks": {}
+                },
+                "core_text_JAjdCz": {
+                  "type": "core-text",
+                  "name": "t:names.core-text",
+                  "settings": {
+                    "text": "<p>Our mission is to enrich everyday life through a diverse range of high-quality home goods, electronics, and apparel. </p>",
+                    "use_custom_spacing": true,
+                    "padding_top": 0,
+                    "padding_inline_end": 0,
+                    "padding_bottom": 3,
+                    "padding_inline_start": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": ["core_heading_mnBMLU", "core_text_JAjdCz"]
+            },
+            "core_button_8MdNHP": {
+              "type": "core-button",
+              "name": "t:names.core-button",
+              "settings": {
+                "text": "Primary Button",
+                "link": "",
+                "open_in_new_tab": false,
+                "style": "primary",
+                "button_width": "auto",
+                "min_width": 25
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": ["core_group_mPwBph", "core_button_8MdNHP"]
+        }
+      },
+      "block_order": ["core_group_Y7PnzB", "core_group_GGjwjR"]
+    }
+  ]
+}
+{% endschema %}

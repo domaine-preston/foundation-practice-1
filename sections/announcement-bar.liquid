@@ -1,0 +1,135 @@
+{% liquid
+  assign delay = section.settings.autoplay_delay | times: 1
+  assign is_slider = false
+  if section.blocks.size > 1
+    assign is_slider = true
+  endif
+
+  capture color_scheme
+    render '@color-scheme', color_scheme: section.settings.color_scheme
+  endcapture
+%}
+
+{% if is_slider %}
+  {% render '@needs-script', entries: 'core-carousel' %}
+  <core-carousel
+    class='{{ color_scheme }}'
+    role='group'
+    aria-label='{{ 'sections.header.announcement' | t }}'
+    style='--core-carousel-slide-width: 100%; --core-carousel-slide-gap-per-slide: 0px; --core-carousel-gap: 0px;'
+
+    {% if delay > 1 %}
+      data-loop='true'
+      data-slide-interval='{{ delay }}'
+    {% endif %}
+  >
+    <button
+      class='core-carousel-button core-carousel-button-prev rotate-90 bg-transparent text-inherit'
+      data-carousel-prev
+      aria-label='{{ 'general.slider.previous_slide' | t }}'
+
+      {% if section.settings.loop == false %}
+        disabled
+      {% endif %}
+    >
+      {% render 'icon' with 'icon-caret', size: 12 %}
+    </button>
+    <button
+      class='core-carousel-button core-carousel-button-next -rotate-90 bg-transparent text-inherit'
+      data-carousel-next
+      aria-label='{{ 'general.slider.next_slide' | t }}'
+    >
+      {% render 'icon' with 'icon-caret', size: 12 %}
+    </button>
+
+    <div
+      class='core-carousel-slides'
+      aria-atomic='false'
+      aria-live='{% if section.settings.loop %}off{% else %}polite{% endif %}'
+      data-carousel-slides
+    >
+      {% for block in section.blocks %}
+        <div
+          class='core-carousel-slide flex px-12 py-1 justify-center items-center'
+          {{ block.shopify_attributes }}
+          {% if forloop.first %}
+            data-carousel-active
+          {% endif %}
+          role='group'
+          aria-label='{{ 'accessibility.slide_of' | t: slide: forloop.index, totalSlides: forloop.length }}'
+          aria-roledescription='slide'
+          data-carousel-slide
+          tabindex='0'
+        >
+          <p class='truncate rte'>
+            <span class='md:hidden'>{{ block.settings.mobile_text | default: block.settings.text }}</span>
+            <span class='hidden md:inline'>{{ block.settings.text }}</span>
+          </p>
+        </div>
+      {% endfor %}
+    </div>
+  </core-carousel>
+
+{% else %}
+  {% assign announcement = section.blocks | first %}
+  <div class='py-1 px-2 md:px-12 flex items-center justify-center {{ color_scheme }}'>
+    <p class='truncate rte'>
+      <span class='md:hidden'>{{ announcement.settings.mobile_text | default: announcement.settings.text }}</span>
+      <span class='hidden md:inline'>{{ announcement.settings.text }}</span>
+    </p>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "t:sections.announcement-bar.name",
+  "class": "relative announcement-bar-wrapper",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "number",
+      "label": "t:sections.announcement-bar.settings.autoplay_delay.label",
+      "info": "t:sections.announcement-bar.settings.autoplay_delay.info",
+      "id": "autoplay_delay",
+      "default": 8000
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "announcement",
+      "name": "t:sections.announcement-bar.blocks.announcement.name",
+      "settings": [
+        {
+          "type": "inline_richtext",
+          "id": "text",
+          "default": "Welcome to our store",
+          "label": "t:sections.announcement-bar.blocks.announcement.settings.text.label"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "mobile_text",
+          "default": "Welcome to our store",
+          "label": "t:sections.announcement-bar.blocks.announcement.settings.mobile_text.label",
+          "info": "t:sections.announcement-bar.blocks.announcement.settings.mobile_text.info"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.announcement-bar.name",
+      "blocks": [
+        {
+          "type": "announcement"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

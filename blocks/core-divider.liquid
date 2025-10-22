@@ -1,0 +1,115 @@
+{%- liquid
+  assign block_settings = block.settings
+  assign class = ''
+  if request.visual_preview_mode
+    assign class = 'w-screen'
+  endif
+  render 'core-divider', width_percent: block_settings.width_percent, horizontal_alignment: block_settings.horizontal_alignment, thickness: block_settings.thickness, block: block, id: block.id, border_radius: block_settings.border_radius, class: class
+-%}
+
+{% schema %}
+{
+  "name": "t:names.core-divider",
+  "tag": null,
+  "settings": [
+    {
+      "type": "range",
+      "id": "thickness",
+      "label": "t:settings.thickness",
+      "min": 0.5,
+      "max": 5,
+      "step": 0.5,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "border_radius",
+      "label": "t:settings.border_radius",
+      "options": [
+        {
+          "value": "square",
+          "label": "t:options.square"
+        },
+        {
+          "value": "rounded",
+          "label": "t:options.rounded"
+        }
+      ],
+      "default": "square",
+      "visible_if": "{{ block.settings.thickness > 1 and block.settings.width_percent != 100 }}"
+    },
+    {
+      "type": "range",
+      "id": "width_percent",
+      "label": "t:settings.width",
+      "min": 5,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "select",
+      "id": "horizontal_alignment",
+      "label": "t:settings.alignment",
+      "options": [
+        {
+          "value": "justify-start",
+          "label": "t:options.left"
+        },
+        {
+          "value": "justify-center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "justify-end",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "justify-center",
+      "visible_if": "{{ block.settings.width_percent < 100 }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_bottom",
+      "default": 0
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.core-divider",
+      "category": "t:preset_categories.core-basic",
+      "settings": {
+        "thickness": 1,
+        "padding_top": 4,
+        "padding_bottom": 4,
+        "width_percent": 100
+      }
+    }
+  ]
+}
+{% endschema %}

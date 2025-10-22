@@ -1,0 +1,87 @@
+name: Checks and Tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, reopened, synchronize, edited]
+    branches:
+      - main
+
+jobs:
+  checksAndTests:
+    name: Run Checks and Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: 🛡️ Check for Protected Core Files
+        run: |
+          echo "🔍 Checking for modifications to protected core files..."
+
+          # Define protected file patterns
+          protected_patterns=("src/entry/core/" "blocks/core-" "sections/core-" "snippets/@")
+
+          # Check each pattern
+          has_protected_files=false
+          for pattern in "${protected_patterns[@]}"; do
+              if git diff --name-only origin/main...HEAD | grep -q "$pattern"; then
+                  has_protected_files=true
+                  echo "❌ ERROR: Attempting to modify protected core files matching pattern: $pattern"
+                  echo ""
+                  echo "📁 Protected files found in this PR:"
+                  git diff --name-only origin/main...HEAD | grep "$pattern" | sed 's/^/   • /'
+                  echo ""
+              fi
+          done
+
+          if [ "$has_protected_files" = true ]; then
+              echo "🚫 PR BLOCKED: Core files are read-only and should not be modified directly."
+              echo ""
+              echo "📖 Instead, you should:"
+              echo "   • For JS/TS core files: Create a new component that extends the core component"
+              echo "   • For Liquid core files: Copy the file with a new name and modify the copy"
+              echo ""
+              echo "💡 Core files that should not be modified:"
+              echo "   • src/entry/core/*.ts - Core TypeScript components"
+              echo "   • blocks/core-*.liquid - Core Liquid blocks"  
+              echo "   • sections/core-*.liquid - Core Liquid sections"
+              echo "   • snippets/@*.liquid - Core Liquid snippets"
+              echo ""
+              exit 1
+          fi
+
+          echo "✅ No protected core files detected in this PR. Proceeding..."
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Test Build
+        run: npm run build
+
+      - name: Run typechecks
+        run: |
+          npm run typecheck
+
+      - name: Run unit tests
+        run: |
+          npm run test
+
+      - name: Lint JS
+        run: |
+          npm run lint:js
+
+      - name: Theme Check
+        run: npx shopify theme check --fail-level=error
+
+      - name: Run JSON Lint
+        run: bash <(curl -s https://raw.githubusercontent.com/CICDToolbox/json-lint/master/pipeline.sh)
+        env:
+          INCLUDE_FILES: 'locales/*.json'

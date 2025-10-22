@@ -1,0 +1,202 @@
+name: Feature request
+description: Suggest an idea to improve the Foundation tooling.
+labels:
+  - 'enhancement'
+  - 'needs-triage'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        💡 **Thank you for suggesting a feature for Domaine's Foundation tooling!**
+
+        Before submitting, please check:
+        - [ ] [Documentation](../docs/README.md) to see if this functionality already exists
+        - [ ] [Common Questions](../docs/common-questions.md) for implementation patterns
+        - [ ] Existing issues to avoid duplicates
+
+  - type: textarea
+    attributes:
+      label: Is your feature request related to a problem? Please describe.
+      description: A clear and concise description of what the problem is or what's missing.
+      placeholder: |
+        Example: I'm always frustrated when I need to manually configure spacing for each section because there's no global spacing preset system...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Describe the solution you'd like
+      description: A clear and concise description of what you want to happen.
+      placeholder: |
+        Be specific about:
+        - What functionality you want
+        - How it should work
+        - Where it should appear in the theme
+        - Any configuration options needed
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Feature category
+      description: What type of feature is this?
+      options:
+        - New core component (block)
+        - New section type
+        - Enhancement to existing component
+        - New theme setting/configuration
+        - Performance improvement
+        - Accessibility improvement
+        - Developer experience improvement
+        - Third-party integration
+        - Design/styling enhancement
+        - Mobile-specific feature
+        - Admin/merchant experience
+        - Customer experience
+        - Other (please specify in description)
+    validations:
+      required: true
+
+  - type: checkboxes
+    attributes:
+      label: Affected areas
+      description: Which parts of the theme would this feature impact? (Check all that apply)
+      options:
+        - label: Core components (buttons, headings, text, etc.)
+        - label: Layout system (sections, groups, spacing)
+        - label: Product pages and forms
+        - label: Collection pages and filtering
+        - label: Cart and checkout experience
+        - label: Header and navigation
+        - label: Footer
+        - label: Search functionality
+        - label: Image handling and optimization
+        - label: Video/media components
+        - label: Carousel/slider components
+        - label: FAQ/accordion components
+        - label: Color system and theming
+        - label: Typography system
+        - label: Responsive design and mobile
+        - label: Performance and loading
+        - label: Accessibility features
+        - label: SEO and meta tags
+        - label: Analytics and tracking
+        - label: Localization/translations
+        - label: Theme settings and customization
+        - label: Developer tools and workflows
+        - label: Third-party app compatibility
+
+  - type: textarea
+    attributes:
+      label: Describe alternatives you've considered
+      description: A clear and concise description of any alternative solutions or features you've considered.
+      placeholder: |
+        Have you tried:
+        - Using existing core components in a different way?
+        - Custom CSS/JavaScript solutions?
+        - Third-party apps or integrations?
+        - Workarounds with current functionality?
+
+  - type: textarea
+    attributes:
+      label: Use cases and examples
+      description: Provide specific examples of how this feature would be used.
+      placeholder: |
+        Examples:
+        - A beauty brand wants to showcase ingredient lists with expandable details
+        - An e-commerce store needs product comparison tables
+        - A merchant wants to display testimonials with star ratings
+        - Developers need better debugging tools for section rendering
+
+  - type: dropdown
+    attributes:
+      label: Priority level
+      description: How important is this feature to your workflow?
+      options:
+        - Critical (blocking major functionality)
+        - High (significantly improves workflow)
+        - Medium (nice to have, improves experience)
+        - Low (minor enhancement)
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Technical considerations
+      description: Any technical details, constraints, or implementation ideas?
+      placeholder: |
+        Consider mentioning:
+        - Shopify API limitations or requirements
+        - Performance implications
+        - Browser compatibility needs
+        - Mobile-specific considerations
+        - Integration with existing core components
+        - Schema/settings structure ideas
+        - Accessibility requirements
+
+  - type: input
+    attributes:
+      label: Related Shopify features
+      description: Are there specific Shopify features, APIs, or patterns this should integrate with?
+      placeholder: 'e.g., Shopify Metafields, Liquid filters, Section Groups, Product Recommendations API'
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: Add any other context, screenshots, mockups, or examples about the feature request here.
+      placeholder: |
+        You can include:
+        - Screenshots or mockups of desired functionality
+        - Links to similar implementations on other themes
+        - Code snippets or pseudo-code
+        - References to Shopify documentation
+        - Examples from other e-commerce platforms
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### 🏗️ Implementation Guidelines (For Reference)
+
+        **Core Component Principles:**
+        - Components should be reusable and composable
+        - Follow existing patterns in `core-*` components
+        - Use design tokens for spacing, colors, and typography
+        - Ensure accessibility compliance (WCAG 2.2)
+        - Support both light and dark color modes
+        - Include responsive design considerations
+
+        **Existing Core Components:**
+        - `core-button` - Flexible button component with multiple styles
+        - `core-heading` - Typography component with semantic heading levels
+        - `core-text` - Rich text component with color and spacing options
+        - `core-image` - Advanced image component with optimization
+        - `core-video` - Video component with accessibility features
+        - `core-carousel` - Swiper-based carousel with full customization
+        - `core-accordion` - Collapsible content component
+        - `core-group` - Layout container with flex controls
+        - `core-spacer` - Spacing utility component
+        - `core-divider` - Visual separator component
+
+        **Theme Architecture:**
+        - Use `@needs-script` for section-specific JavaScript
+        - Leverage design tokens from `snippets/@*.liquid`
+        - Follow Tailwind-first CSS approach
+        - Extend core components rather than modifying them
+        - Consider performance impact on Core Web Vitals
+
+        **Common Enhancement Patterns:**
+        - Add new style variants to existing components
+        - Extend schema options for more customization
+        - Improve responsive behavior
+        - Add animation and interaction capabilities
+        - Enhance accessibility features
+        - Optimize for performance and loading speed
+
+        ### 🤝 Community Contribution
+
+        Interested in implementing this feature yourself? Check out:
+        - [Development workflow](../docs/development.md)
+        - [Core component patterns](../docs/core/core-general.md)
+        - [CSS standards](../docs/standards/css-standards.md)
+        - [HTML standards](../docs/standards/html-standards.md)

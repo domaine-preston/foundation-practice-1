@@ -1,0 +1,113 @@
+{%- render 'core-text', block: block -%}
+{% schema %}
+{
+  "name": "t:names.core-heading",
+  "tag": null,
+  "settings": [
+    {
+      "type": "select",
+      "id": "heading_style",
+      "label": "t:heading_style.label",
+      "options": [
+        {
+          "value": "",
+          "label": "t:heading_style.options.default"
+        },
+        {
+          "value": "p",
+          "label": "t:heading_style.options.p"
+        },
+        {
+          "value": "h1",
+          "label": "t:heading_style.options.h1"
+        },
+        {
+          "value": "h2",
+          "label": "t:heading_style.options.h2"
+        },
+        {
+          "value": "h3",
+          "label": "t:heading_style.options.h3"
+        },
+        {
+          "value": "h4",
+          "label": "t:heading_style.options.h4"
+        },
+        {
+          "value": "h5",
+          "label": "t:heading_style.options.h5"
+        },
+        {
+          "value": "h6",
+          "label": "t:heading_style.options.h6"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "t:content.text"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_custom_spacing",
+      "label": "t:spacing.use_custom_spacing.label",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_top",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline_end",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_inline_end",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_bottom",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline_start",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "label": "t:spacing.padding_inline_start",
+      "default": 0,
+      "visible_if": "{{ block.settings.use_custom_spacing }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.core-heading",
+      "category": "t:preset_categories.core-basic",
+      "settings": {
+        "text": "<p>Heading</p>"
+      }
+    }
+  ]
+}
+{% endschema %}

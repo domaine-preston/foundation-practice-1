@@ -1,0 +1,42 @@
+{% doc %}
+  Renders a divider line
+
+  @param {string} [horizontal_alignment] - The horizontal alignment of the divider. Defaults to 'center'.
+  @param {object} [block] - The block object containing settings for the divider.
+  @param {string} [id] - The unique identifier for the divider.
+  @param {number} [thickness] - The thickness of the divider line in pixels. Defaults to 1.
+  @param {number} [width_percent] - The width of the divider as a percentage of its container. Defaults to 100.
+  @param {string} border_radius - The corner radius of the divider.
+  @param {string} [class] - Custom classes to add to the divider.
+{% enddoc %}
+
+{%- capture color_scheme -%}
+  {%- render '@color-scheme', color_scheme: block.settings.color_scheme -%}
+{%- endcapture -%}
+
+{% stylesheet %}
+  .divider__line {
+    height: var(--divider-border-thickness);
+    flex-basis: var(--divider-flex-basis);
+    min-height: var(--divider-flex-basis);
+  }
+{% endstylesheet %}
+
+{%- capture spacing_token -%}
+  {%- render '@spacing-padding', spacing_settings: block.settings -%}
+{%- endcapture -%}
+
+<div
+  class='{{ class }} {{ spacing_token | strip | strip_newlines }} flex items-center self-stretch divider-{{ id }} {{ horizontal_alignment }}'
+  {% if block %}
+    {{- block.shopify_attributes -}}
+  {% endif %}
+>
+  <span
+    class='divider__line {{ color_scheme | strip | strip_newlines }} {% if border_radius == 'rounded' and width_percent != 100 %}rounded-full{% endif %}'
+    style='
+      --divider-border-thickness: {{ thickness }}px;
+      --divider-flex-basis: {{ width_percent }}%;
+    '
+  ></span>
+</div>

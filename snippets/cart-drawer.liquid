@@ -1,0 +1,73 @@
+{% doc %}
+  Renders the cart drawer with dynamic cart contents and empty state. Uses cart-sections web component for real-time
+updates and interactions.
+
+Features: - Empty cart state with continue shopping link - Cart items display with quantity and pricing - Real-time cart
+updates without page refresh - Responsive design for mobile and desktop - Integrated with cart context for state
+management
+
+States: - Empty: Shows empty message and continue shopping button - With items: Displays cart contents and totals
+
+Dependencies: - core-cart-sections web component - Cart drawer dialog functionality - Cart item snippets for individual
+products
+
+  @example
+  {% render 'cart-drawer' %}
+{% enddoc %}
+
+{%- render '@needs-script', entries: 'core-cart-sections' -%}
+<cart-sections
+  section-id='cart-drawer'
+  class='flex flex-col h-full bg-background'
+  cloak
+  register-for-cart-updates
+>
+  {% if cart == empty %}
+    <div class='flex flex-col gap-sm items-center justify-center h-full py-2xl m-xs lg:min-h-[50vh]'>
+      <div class='flex flex-col gap-2xs items-center justify-center'>
+        <h2 class='text-heading-5'>{{ 'cart.general.empty' | t }}</h2>
+        <p>{{ 'cart.general.empty_subtitle' | t }}</p>
+      </div>
+      <a class='btn' variant='primary' href='{{ settings.cart_drawer_collection.url }}'>
+        {{- 'cart.general.continue_shopping' | t -}}
+      </a>
+    </div>
+  {% else %}
+    <div class='text-brand-primary-contrast px-sm'>
+      <span class='caption'>
+        {% if cart.item_count == 1 %}
+          {{ 'cart.popup.cart_count.one' | t: count: cart.item_count -}}
+        {% else %}
+          {{ 'cart.popup.cart_count.other' | t: count: cart.item_count -}}
+        {% endif %}
+      </span>
+    </div>
+    <form
+      id='cart'
+      method='post'
+      action='{{ routes.cart_url }}'
+      class='grid grid-cols-1 place-items-start px-sm py-xs flex-1'
+    >
+      <div class='grid w-full'>
+        {%- liquid
+          render 'cart-drawer-item' for cart.items as item
+        -%}
+      </div>
+    </form>
+
+    <div class='sticky bottom-0 bg-background p-sm border-t border-t-border-01 grid grid-cols-1 gap-y-sm'>
+      {%- render 'cart-discount-code' -%}
+      {%- render 'cart-totals-content' -%}
+      <button
+        form='cart'
+        type='submit'
+        variant='primary'
+        id='checkout'
+        name='checkout'
+        class='btn rounded-full'
+      >
+        {{ 'sections.cart.checkout' | t }}
+      </button>
+    </div>
+  {% endif %}
+</cart-sections>
